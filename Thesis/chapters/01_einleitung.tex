@@ -1,0 +1,136 @@
+\chapter{Einleitung}
+\label{chap:einleitung}
+
+\todo[inline]{Alle textuellen Aussagen im Dokument auf Zitationsbedarf prüfen (fehlt an manchen
+Stellen eine Quellenangabe?) und alle vorhandenen Zitate auf Korrektheit verifizieren. Von den
+Quellen der Einleitung ist \cite{graham1969} am Volltext geprüft; \cite{graham1966}
+und \cite{sahni1976} sind bislang nur über die Verlagsmetadaten abgeglichen.}
+
+Ein Betrieb verteilt eingehende Aufträge auf mehrere gleich schnelle Maschinen, ein Rechenzentrum
+verteilt Rechenaufträge auf die Knoten eines Clusters.
+In beiden Fällen ist dieselbe Frage zu beantworten: Welche Aufgabe gehört auf welche Maschine?
+Entscheidend ist dabei nicht die Summe der Bearbeitungszeiten, sondern der Zeitpunkt, zu dem die
+zuletzt beschäftigte Maschine ihre Arbeit beendet.
+Dieser Zeitpunkt heißt \emph{Makespan}, und seine Minimierung ist der Gegenstand dieser Arbeit.
+
+Formal sind $n$ Aufgaben mit bekannten Bearbeitungszeiten und $m$ identische Maschinen gegeben.
+Jede Aufgabe läuft ohne Unterbrechung auf genau einer Maschine; gesucht ist eine Zuordnung mit
+kleinstmöglichem Makespan.
+In der Notation von \textcite{graham1979} trägt dieses Problem den Namen $P\,\|\,C_{\max}$.
+Kapitel~\ref{chap:grundlagen} führt diese Notation zusammen mit den übrigen Bezeichnungen ein.
+Das zugehörige Entscheidungsproblem ist NP-vollständig \cite{garey_johnson1979}; sofern
+$\mathrm{P} \ne \mathrm{NP}$ gilt, berechnet folglich kein Algorithmus mit polynomieller Laufzeit
+den minimalen Makespan.
+Gefragt sind deshalb Verfahren, welche schnell eine Zuordnung liefern und deren Abstand zum
+Optimum sich beweisen lässt.
+
+\paragraph{Bekannte Ansätze.}
+Die erste Garantie dieser Art stammt von \textcite{graham1966}.
+Sein Listen-Scheduling durchläuft die Aufgaben in einer beliebigen Reihenfolge und legt jede auf
+die gerade am wenigsten belastete Maschine; der erzeugte Makespan übersteigt das Optimum dabei um
+höchstens den Faktor $2 - 1/m$.
+Werden die Aufgaben zuvor absteigend sortiert, so sinkt dieser Faktor auf $4/3 - 1/(3m)$, und der
+Wert ist scharf \cite[Theorem~2]{graham1969}.
+Diese Regel ist unter dem Namen \emph{Longest Processing Time} bekannt.
+
+Einen anderen Weg gehen \textcite{coffman1978} mit MULTIFIT.
+Statt die Aufgaben unmittelbar zu verteilen, rät das Verfahren eine Kapazität und überlässt einem
+Bin-Packing-Algorithmus die Frage, ob die Aufgaben in $m$ Behälter dieser Kapazität passen.
+Dieser Algorithmus heißt im Folgenden \emph{Subroutine}; \textcite{coffman1978} setzen dafür
+First Fit Decreasing (FFD) ein, welches die Aufgaben absteigend sortiert und jede in den ersten
+Behälter legt, in den sie noch passt.
+Eine Binärsuche über die Kapazität, nach $k$ Halbierungsschritten abgebrochen, macht daraus eine
+Zuordnung.
+Die Güte von MULTIFIT hängt damit an einer rein kombinatorischen Größe, dem
+\emph{Grenzverhältnis} $r_m$: Übersteigt eine Kapazität den optimalen Makespan um mehr als den
+Faktor $r_m$, so kommt FFD mit $m$ Behältern aus (Definition~\ref{def:rm}).
+Für diesen Wert weisen \textcite{coffman1978} zunächst $r_m \le 1{,}22$ nach.
+Über \textcite{friesen1984} und \textcite{yue1990} ist die Schranke später auf $13/11$ verschärft
+worden, und \textcite{cao1995} gibt dafür einen vollständigen Beweis;
+Abschnitt~\ref{sec:chronologie} stellt diese Entwicklung im Einzelnen dar.
+
+Beliebig nah an das Optimum führen Approximationsschemata: Zu jeder vorgegebenen Genauigkeit
+$\varepsilon > 0$ liefern sie eine Zuordnung mit einem Makespan von höchstens $(1+\varepsilon)$
+mal dem Optimum.
+Für eine feste Maschinenzahl gibt \textcite{sahni1976} ein solches Schema an, und
+\textcite{hochbaum_shmoys_1987} behandeln den Fall beliebiger Maschinenzahl über \emph{duale}
+Approximation, bei der nicht die Zahl der Behälter, sondern deren Kapazität aufgeweicht wird.
+Bezahlt wird die Genauigkeit mit Laufzeit: Das Schema von Hochbaum und Shmoys läuft in
+$O\bigl((n/\varepsilon)^{1/\varepsilon^{2}}\bigr)$, was die Autoren selbst als nicht praktikabel
+bezeichnen \cite[S.~146]{hochbaum_shmoys_1987}.
+MULTIFIT liegt zwischen beiden Linien, denn seine Güte ist fest, jeder Suchschritt kostet aber
+nur einen einzigen Aufruf der Subroutine.
+
+Verbessert worden ist MULTIFIT auch, ohne die Subroutine anzutasten.
+\textcite{friesen_langston1986} ersetzen den Zweig, welcher eine Kapazität verwirft, durch eine
+Reparatur: Eine beschränkte Zahl besonders ungünstig belegter Maschinen wird zusammen mit den
+dabei übrig gebliebenen Aufgaben optimal neu belegt.
+Das Verhältnis von erzeugtem zu optimalem Makespan sinkt dadurch auf $72/61$ - asymptotisch
+scharf und damit unter $13/11$ -, während die Laufzeitordnung $O(n \log n)$ erhalten bleibt.
+Diese Arbeit geht den anderen Weg und lässt die Suche unangetastet.
+
+Welche Subroutine dort steht, ist ein eigener Strang der Literatur.
+FFD benötigt höchstens $11/9$ mal so viele Behälter wie eine optimale Packung, zuzüglich einer
+additiven Konstanten; diese Schranke ist scharf \cite{dosa2007}.
+Für Modified First Fit Decreasing (MFFD) ist mit $71/60$ eine kleinere obere Schranke bewiesen
+\cite{johnson_garey1985, yue_zhang1995}, woraus jedoch nicht folgt, dass MFFD im schlechtesten
+Fall tatsächlich besser abschneidet.
+Kommen in einer Instanz nur wenige verschiedene Aufgabengrößen vor, so erreicht der
+$\mathrm{OPT}+1$-Algorithmus von \textcite{jansen_solisoba2010} sogar eine Packung mit höchstens
+einem Behälter über dem Optimum; sein Name benennt genau diese Garantie.
+Ob ein solcher Vorteil den Makespan von MULTIFIT verkleinert, ist damit allerdings nicht gesagt:
+Dessen Gütegarantie beruht auf einer bestimmten Eigenschaft von FFD, welche eine schärfere
+Bin-Packing-Schranke nicht ersetzt.
+
+Daneben stehen exakte Verfahren, etwa die Arc-Flow-Modelle von \textcite{mrad2018} oder die
+Suchverfahren von \textcite{akram2025}.
+Sie liefern den minimalen Makespan, besitzen im schlechtesten Fall aber keine polynomielle
+Laufzeit; in Kapitel~\ref{chap:evaluation} dienen ihre publizierten Werte als Vergleichsgrundlage.
+
+\paragraph{Beitrag dieser Arbeit.}
+Die Arbeit verfolgt zwei Ziele.
+Das erste ist eine geschlossene Aufbereitung der Performanzanalyse von MULTIFIT.
+\textcite{cao1995} dient dabei als primäre Quelle, setzt die Ergebnisse von
+\textcite{coffman1978} jedoch über weite Strecken voraus und führt einzelne Beweisschritte nur
+knapp aus.
+Kapitel~\ref{chap:performanz} führt deshalb die Herleitung der Schranke $r_m \le 5/4$
+vollständig aus und verbindet sie in Theorem~\ref{thm:guete} mit dem Makespan, den MULTIFIT nach
+$k$ Suchschritten zurückgibt.
+Die schärfere Schranke $13/11$ wird eingeordnet und ihre Beweisidee dargestellt, nicht aber
+bewiesen; Caos Fallunterscheidung bleibt außerhalb des Umfangs dieser Arbeit.
+Die zugehörige untere Schranke wird dagegen geführt, denn eine Instanz von \textcite{friesen1984}
+belegt $r_m \ge 13/11$ für alle $m \ge 13$.
+
+Das zweite Ziel betrifft die Subroutine, denn innerhalb von MULTIFIT ist sie austauschbar.
+Kapitel~\ref{kap:alternative} untersucht drei Alternativen theoretisch.
+Zwei Ergebnisse daraus sind eigenständige Beiträge.
+Zum einen gibt das Kollaps-Lemma eine Klasse von Instanzen an, auf der MFFD und FFD innerhalb von
+MULTIFIT stets dieselbe Zuordnung erzeugen.
+Zum anderen wird der $\mathrm{OPT}+1$-Algorithmus von \textcite{jansen_solisoba2010} zu einem
+$\varepsilon$-dualen Approximationsalgorithmus umgebaut.
+Zusammen mit dem Ergebnis von \textcite{hochbaum_shmoys_1987} garantiert dieser Umbau nach $k$
+Suchschritten einen Makespan von höchstens $(1+\varepsilon)(1+2^{-k})$ mal dem Optimum.
+Als dritte Alternative dient das Konfigurations-LP von \textcite{gilmore_gomory1961}, welches
+jede mögliche Füllung eines Behälters als eigene Variable führt und die Ganzzahligkeit zunächst
+fallen lässt.
+Für dieses Programm wird umgekehrt gezeigt, dass die beim Runden entstehende Schranke gerade
+nicht ausreicht, um die Gütegarantie von MULTIFIT zu tragen.
+
+Was der Austausch praktisch bewirkt, misst Kapitel~\ref{chap:evaluation} in zwei Versuchsreihen.
+Die erste vergleicht FFD und MFFD auf \EvalInstanzen{} Instanzen aus fünf publizierten
+Benchmark-Datensätzen, die zweite vier Subroutinen für Instanzen mit wenigen verschiedenen
+Aufgabengrößen auf \HmInstanzen{} eigens erzeugten Instanzen.
+Kein gemessenes Verhältnis überschreitet dabei $13/11$ - für MULTIFIT+FFD ist das die bewiesene
+Schranke, für die übrigen Kombinationen lediglich eine Vergleichslinie.
+Zugleich zeigen beide Reihen, dass aus einer schärferen Bin-Packing-Garantie kein kleinerer
+Makespan folgt.
+
+\paragraph{Aufbau.}
+Kapitel~\ref{chap:grundlagen} legt die Grundlagen: Problemstellung und Notation, Bin Packing mit
+FFD sowie der Algorithmus MULTIFIT samt seinem Startintervall.
+Kapitel~\ref{chap:performanz} enthält die Performanzanalyse, Kapitel~\ref{kap:alternative} die
+drei alternativen Subroutinen und Kapitel~\ref{chap:evaluation} die empirische Auswertung.
+Kapitel~\ref{chap:fazit} fasst die Ergebnisse zusammen und benennt die offen gebliebenen Fragen.
+Sämtliche Implementierungen und Messskripte liegen unter
+\url{https://github.com/hempllll/MultiFit-BscThs}; den Versuchsaufbau beschreibt
+Abschnitt~\ref{sec:versuchsaufbau}.

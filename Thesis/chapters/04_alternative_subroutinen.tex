@@ -1,0 +1,863 @@
+\chapter{Alternative Subroutinen}
+\label{kap:alternative}
+
+Die Quellen dieses Kapitels benutzen jeweils eigene Bezeichnungen: \textcite{jansen_solisoba2010}
+schreiben $\beta$ für die Kapazität und $n_i$ für die Vielfachheiten,
+\textcite{gilmore_gomory1961} nennen die Kapazität eine \emph{Lagerlänge}.
+Auch für den zentralen Begriff dieses Kapitels - den Inhalt eines einzelnen Bins, hier
+\emph{Konfiguration} genannt und in Definition~\ref{def:konfiguration} festgelegt - führt jede
+Quelle ein eigenes Wort.
+Bei Jansen und Solis-Oba steht $\mathcal{C}$ für die Menge dieser Objekte, bei Gilmore und Gomory
+heißen sie \emph{Schnittmuster}.
+Hier wird stattdessen durchgehend die in Kapitel~\ref{chap:grundlagen} festgelegte Notation
+verwendet: Instanz $\Gamma$, Kapazität $C$, Binzahlen $\mathrm{FFD}[\Gamma, C]$ und
+$\mathrm{OPT}[\Gamma, C]$.
+Das macht die drei Subroutinen ohne Übersetzungsschritt vergleichbar und erspart es, denselben
+Begriff mehrfach zu definieren.
+
+\section{MFFD als Subroutine in MULTIFIT}
+\label{sec:mffd-subroutine}
+
+\subsection{Der Algorithmus MFFD}
+\label{sub:mffd}
+
+\emph{Modified First Fit Decreasing} (MFFD) geht auf \textcite{johnson_garey1985} zurück.
+Der Algorithmus löst dasselbe Problem wie FFD - Bin Packing bei fester Kapazität nach
+Definition~\ref{def:binpacking} - und erhält dieselbe Eingabe: die Aufgaben einer Instanz
+$\Gamma$ und eine Kapazität $C$.
+Er klassifiziert die Aufgaben relativ zu $C$ in vier Klassen:
+\emph{large} ($p_j > C/2$), \emph{medium} ($C/3 < p_j \le C/2$), \emph{small} ($C/6 < p_j \le C/3$)
+und \emph{tiny} ($p_j \le C/6$).
+Anschließend durchläuft er fünf Phasen \cite{johnson_garey1985}.
+
+\begin{enumerate}[label=\textit{Phase~\arabic*.}, leftmargin=*, itemsep=3pt]
+  \item Für jede large-Aufgabe wird ein eigener Bin eröffnet, in absteigender Reihenfolge der
+    Größen. Aufgaben der übrigen Klassen eröffnen hier keinen Bin.
+  \item Vorwärtslauf über diese Bins. In jeden Bin wird die größte noch unplatzierte
+    medium-Aufgabe gelegt, die dort hineinpasst; passt keine, bleibt der Bin unverändert.
+    Jeder Bin erhält so höchstens eine medium-Aufgabe.
+  \item Rückwärtslauf über diejenigen Bins, die in Phase~2 keine medium-Aufgabe erhalten haben.
+    Passen die beiden kleinsten noch unplatzierten small-Aufgaben nicht gemeinsam in den Bin, so
+    bleibt er unverändert; andernfalls werden die kleinste noch unplatzierte small-Aufgabe und
+    danach die größte noch passende small-Aufgabe eingefügt.
+  \item Erneuter Vorwärtslauf über alle Bins. In jeden Bin wird wiederholt die größte noch
+    unplatzierte Aufgabe beliebiger Klasse gelegt, die noch hineinpasst, bis keine mehr passt.
+  \item Die danach noch unplatzierten Aufgaben werden mit FFD in neue Bins gepackt.
+\end{enumerate}
+
+\noindent
+Mit $\mathrm{MFFD}[\Gamma, C]$ wird die Anzahl der insgesamt erzeugten Bins bezeichnet.
+\textcite{johnson_garey1985} zeigen
+\begin{equation}
+  \mathrm{MFFD}[\Gamma, C] \;\le\; \tfrac{71}{60}\,\mathrm{OPT}[\Gamma, C] + \tfrac{31}{6};
+  \label{eq:mffd-guete}
+\end{equation}
+\textcite{yue_zhang1995} verschärfen die additive Konstante auf $1$.
+
+Die beiden Faktoren $71/60$ und $11/9$ sind dabei nicht von derselben Art.
+Für FFD ist die Schranke \eqref{eq:ffd-guete} scharf \cite{dosa2007}; das asymptotische
+Worst-Case-Verhältnis von FFD \emph{beträgt} also $11/9 \approx 1{,}2222$.
+Für MFFD ist $71/60 \approx 1{,}1833$ dagegen nur als obere Schranke bewiesen - ob es
+angenommen wird, ist hier nicht belegt.
+Gesichert ist damit die Aussage: Das asymptotische Worst-Case-Verhältnis von MFFD ist
+\emph{höchstens} $71/60$ und damit echt kleiner als das von FFD.
+
+Die Laufzeit bleibt dabei in derselben Größenordnung wie die von FFD.
+Sortieren und Klassifizieren kosten $O(n \log n)$.
+In den Phasen~2 bis~4 wird jeder der höchstens $n$ Bins konstant oft betrachtet, und insgesamt
+werden höchstens $n$ Aufgaben platziert; hält man die Klassenlisten in sortierten Suchstrukturen,
+so kostet jede Suche nach der größten noch passenden Aufgabe $O(\log n)$.
+Phase~5 ist ein FFD-Aufruf.
+Insgesamt ergibt das $O(n \log n)$.
+
+Beide Schranken beziehen sich auf das Bin-Packing-Problem bei fester Kapazität und sind
+asymptotischer Natur: Die additive Konstante fällt erst für große $\mathrm{OPT}[\Gamma, C]$ nicht
+mehr ins Gewicht.
+Ob sich der kleinere Faktor überträgt, wenn MFFD als Subroutine in MULTIFITs Binärsuche eintritt,
+ist damit nicht beantwortet.
+Der folgende Abschnitt gibt eine Bedingung an, unter der er vollständig entfällt.
+
+\subsection{Kollaps von MFFD auf FFD}
+\label{sub:kollaps}
+
+Der Vorteil von MFFD kann innerhalb von MULTIFIT vollständig entfallen, und zwar aus einem
+strukturellen Grund, der sich exakt fassen lässt.
+Phase~1 eröffnet für jede large-Aufgabe einen eigenen Bin; die Phasen~2 bis~4 durchlaufen ausschließlich die dabei entstandene Binliste und füllen sie auf.
+Phase~5 übergibt alle danach noch unplatzierten Aufgaben an FFD.
+Gibt es keine large-Aufgabe, so ist die Binliste nach Phase~1 leer, die Phasen~2 bis~4 sind wirkungslos, und Phase~5 wendet FFD auf die vollständige Aufgabenliste an.
+Beide Subroutinen erzeugen dann dieselbe Packung, insbesondere dieselbe Binzahl:
+\begin{equation}
+  p_{\max} \le C/2 \quad\Longrightarrow\quad
+  \mathrm{MFFD}[\Gamma, C] = \mathrm{FFD}[\Gamma, C].
+  \label{eq:mffd-gleich-ffd}
+\end{equation}
+Entscheidend ist, dass MULTIFIT nicht beliebige Kapazitäten testet, sondern nur solche oberhalb der unteren Grenze $c_{\mathrm{low}}^{(0)}$ des Startintervalls~\eqref{eq:startintervall}.
+Daraus folgt ein Kriterium, das allein von der Instanz abhängt.
+
+\begin{lemma}[Kollaps von MFFD auf FFD]
+\label{lem:kollaps}
+Sei $\Gamma$ eine Instanz mit $n$ Aufgaben der Größen $p_1, \ldots, p_n$, sei $m \ge 1$ eine
+Maschinenzahl und
+\[
+  \rho(\Gamma) \;:=\; \frac{\sum_{j=1}^{n} p_j}{m \cdot p_{\max}}.
+\]
+Betrachtet wird MULTIFIT mit dem Startintervall aus \eqref{eq:startintervall}, dessen untere
+Grenze $c_{\mathrm{low}}^{(0)}$ ist.
+Ist $\rho(\Gamma) \ge 2$, so liefern MULTIFIT+FFD und MULTIFIT+MFFD für jede Iterationszahl $k$ dieselbe Partition; insbesondere stimmen die Makespans überein.
+\end{lemma}
+
+\begin{proof}
+Zunächst gilt $c_{\mathrm{low}} \le c_{\mathrm{high}}$ als Invariante über alle Iterationen:
+Anfangs ist sie vorausgesetzt, und jeder Schritt ersetzt entweder $c_{\mathrm{high}}$ oder
+$c_{\mathrm{low}}$ durch das arithmetische Mittel $\tfrac{1}{2}(c_{\mathrm{low}} + c_{\mathrm{high}})$,
+das zwischen beiden Grenzen liegt.
+Damit ist jede getestete Kapazität $C$ mindestens so groß wie die zu diesem Zeitpunkt aktuelle
+untere Grenze, und da $c_{\mathrm{low}}$ im Verlauf der Suche nur wächst, gilt
+$C \ge c_{\mathrm{low}}^{(0)}$ für jede getestete Kapazität.
+
+Aus $\rho(\Gamma) \ge 2$ folgt $2\, p_{\max} \le \sum_j p_j / m \le c_{\mathrm{low}}^{(0)} \le C$, also $p_{\max} \le C/2$ für jede getestete Kapazität $C$.
+Nach dem oben beschriebenen Phasenablauf erzeugen beide Subroutinen bei jedem einzelnen Test dieselbe Packung, nach \eqref{eq:mffd-gleich-ffd} insbesondere dieselbe Binzahl.
+Die Binärsuche trifft damit in jeder Iteration dieselbe Verzweigungsentscheidung; per Induktion über die $k$ Iterationen stimmen die Intervallgrenzen und die jeweils gespeicherte beste Partition zu jedem Zeitpunkt überein.
+\end{proof}
+
+\begin{bemerkung}
+Der Beweis nutzt von der oberen Intervallgrenze nichts und gilt daher für jede der
+gebräuchlichen Varianten, etwa $c_{\mathrm{high}}^{(0)} = \sum_j p_j/m + p_{\max}$ oder
+$c_{\mathrm{high}}^{(0)} = \max(\sum_j p_j/m,\, 2 p_{\max})$.
+Er überträgt sich außerdem auf die Variante mit ganzzahligen Kapazitäten:
+Sind alle $p_j$ ganzzahlig, so folgt aus $\rho(\Gamma) \ge 2$ auch
+$\lfloor \sum_j p_j/m \rfloor \ge \lfloor 2 p_{\max} \rfloor = 2 p_{\max}$,
+und alle getesteten Kapazitäten bleiben $\ge 2 p_{\max}$.
+\end{bemerkung}
+
+Für gleichverteilte Aufgabengrößen lässt sich das Kriterium in das Verhältnis $n/m$ übersetzen.
+Sind die $p_j$ unabhängig gleichverteilt auf $[0, P]$, so ist $\mathbb{E}\!\left[\sum_j p_j\right] = nP/2$ und $p_{\max} \le P$, also
+\[
+  \mathbb{E}[\rho(\Gamma)] \;\ge\; \frac{nP/2}{mP} \;=\; \frac{n}{2m}.
+\]
+Ab $n/m \ge 4$ ist demnach zu erwarten, dass $\rho(\Gamma) \ge 2$ gilt und beide Subroutinen dieselbe Ausgabe liefern.
+Das ist eine Aussage über den Erwartungswert und keine Garantie für die einzelne Instanz - Instanzen mit wenigen sehr großen und vielen sehr kleinen Aufgaben verletzen $\rho(\Gamma) \ge 2$ auch bei großem $n/m$.
+Lemma~\ref{lem:kollaps} ist von der Größenverteilung dagegen unabhängig.
+
+Der Austausch der Subroutine kann sich also nur auf Instanzen mit $\rho(\Gamma) < 2$ auswirken.
+
+Damit ist zugleich gesagt, was Lemma~\ref{lem:kollaps} \emph{nicht} leistet.
+Die Bedingung $\rho(\Gamma) \ge 2$ beschreibt eine Klasse von Instanzen; auf ihr liefern beide
+Subroutinen dieselbe Ausgabe, über das Verhalten auf allen übrigen Instanzen folgt daraus nichts.
+Für die Schranke $13/11$ ist die Klasse ohne Belang, denn der bekannte Extremfall liegt außerhalb:
+Die Instanz von \textcite{friesen1984}, auf der MULTIFIT+FFD das Verhältnis $13/11$ annimmt, hat
+$\rho = 858/(13 \cdot 40) = 1{,}65 < 2$ (Abschnitt~\ref{sec:friesen}).
+Das Lemma grenzt also ein, wo ein Unterschied zwischen den beiden Subroutinen überhaupt möglich
+ist; eine schärfere obere Schranke für MULTIFIT+MFFD folgt daraus nicht.
+Wie groß der Anteil der Instanzen mit $\rho(\Gamma) < 2$ auf den Benchmark-Datensätzen ist und wie
+sich MFFD dort verhält, wird in Abschnitt~\ref{sec:kollaps-empirisch} untersucht.
+
+
+\section{OPT+1-Algorithmus von Jansen und Solis-Oba}
+\label{sec:jansen}
+
+\textcite{jansen_solisoba2010} geben einen Algorithmus für das Cutting-Stock-Problem an, der bei $d$ verschiedenen Objektlängen - in der Notation dieser Arbeit: $d$ verschiedenen
+Aufgabengrößen - eine Packung in höchstens $\mathrm{OPT}+1$ Bins berechnet.
+Cutting Stock ist Bin Packing in der \emph{High-Multiplicity}-Darstellung: Statt $n$ einzelner Aufgaben werden $d$ verschiedene Größen $p_1 > p_2 > \cdots > p_d > 0$ mit Vielfachheiten $u_1, \ldots, u_d$ angegeben, wobei $\sum_{i=1}^{d} u_i = n$.
+Diese Darstellung wird in diesem Kapitel durchgehend verwendet; die Kapazität $C$ ist dabei ganzzahlig.
+
+\begin{definition}[Konfiguration]
+\label{def:konfiguration}
+Eine \emph{Konfiguration} zur Kapazität $C$ ist ein Vektor $a = (a_1, \ldots, a_d) \in \mathbb{Z}_{\ge 0}^{d}$ mit
+\[
+  \sum_{i=1}^{d} a_i\, p_i \;\le\; C
+  \qquad\text{und}\qquad
+  a_i \le u_i \ \text{ für alle } i .
+\]
+Sie beschreibt den Inhalt \emph{eines} zulässigen Bins.
+Die Menge aller Konfigurationen wird mit $\mathcal{K}(\Gamma, C)$ bezeichnet, ihre Anzahl mit $q = |\mathcal{K}(\Gamma, C)|$.
+\end{definition}
+
+\noindent
+Eine Packung ist damit eine Auswahl von Konfigurationen mit Wiederholung, die jede Größe oft genug abdeckt.
+Mit $\mathrm{J}[\Gamma, C]$ wird im Folgenden die Anzahl der Bins bezeichnet, die der Algorithmus von Jansen und Solis-Oba bei Kapazität $C$ auf $\Gamma$ erzeugt.
+
+\subsection{Laufzeit}
+\label{sub:jansen-laufzeit}
+
+Die Laufzeit beträgt
+\[
+  d^{O(d2^d)} \times 2^{O(8^d)} \times O\!\left((\log^2 n + \log C)^3 \log^5 n\right).
+\]
+Dabei erscheint $\log C$, weil die Kapazität Teil der Eingabegröße ist.
+Die Laufzeit ist polynomiell in $\log n$, aber doppelt exponentiell in $d$.
+
+\subsection{Implementierung}
+\label{sub:jansen-implementierung}
+
+Die Implementierung folgt den drei Schritten des Algorithmus von Jansen und Solis-Oba:
+Partitionierung der Aufgaben in große und kleine, Lösung eines gemischt-ganzzahligen linearen
+Programms (MILP) über alle großen Konfigurationen und anschließende Rundung der fraktionalen
+Lösung.
+Als Eingabe dienen drei Parameter: die Liste der $d$ verschiedenen Größen $p = (p_1, \ldots, p_d)$,
+die zugehörigen Vielfachheiten $u = (u_1, \ldots, u_d)$ sowie die ganzzahlige Kapazität $C$.
+Anstelle von Lenstras Algorithmus \cite{lenstra1983} wird Gurobi eingesetzt:
+Gurobi bietet keine polynomielle Worst-Case-Garantie, ist für die hier auftretenden
+MILP-Größen aber praktikabel; die gemessenen Laufzeiten stehen in
+Abschnitt~\ref{sub:hm-laufzeit}.
+
+Im Originalalgorithmus wird über alle Teilmengen $S^B \subseteq \mathcal{K}^B$ der Größe $2^d$ iteriert,
+da Lenstras Algorithmus eine feste obere Schranke an die Anzahl ganzzahliger Variablen voraussetzt.
+Mit Gurobi entfällt diese Einschränkung: Es genügt, ein einziges MILP mit allen großen Konfigurationen
+als ganzzahlige Variablen aufzustellen. Nach \textcite{eisenbrand_shmonin2006} (dort zitiert in \cite{jansen_solisoba2010})
+setzt die optimale Lösung ohnehin höchstens $2^d$ dieser Variablen auf einen Wert größer null -
+Gurobi findet diese aktiven Konfigurationen selbst.
+Die Subset-Enumeration wäre in der Praxis auch gar nicht durchführbar: Für $d = 3$ gibt es bereits
+$\binom{125}{8} \approx 10^{12}$ Teilmengen, für $d = 5$ etwa $10^{117}$ -
+verglichen mit einem einzigen MILP, dessen Zahl ganzzahliger Variablen für festes $d$
+konstant beschränkt ist.
+
+\subsubsection{Schritt 1: Partitionierung in große und kleine Aufgaben}
+
+Zunächst wird der Schwellenwert
+\[
+  \varepsilon = \frac{1}{2d - 1}
+\]
+berechnet. Aufgaben mit Größe $p_i \ge \varepsilon C$ heißen \emph{groß}, alle übrigen \emph{klein};
+$\alpha$ bezeichnet die Anzahl der großen Größen, sodass $p_1, \ldots, p_\alpha$ groß sind.
+Für eine Konfiguration $a \in \mathcal{K}(\Gamma, C)$ heißt $a^B = (a_1, \ldots, a_\alpha)$ ihr \emph{großer Anteil};
+die Menge aller großen Anteile wird mit $\mathcal{K}^B$ bezeichnet.
+Die Wahl von $\varepsilon$ ist nicht willkürlich: Da jede große Aufgabe mindestens
+$\varepsilon C = C/(2d-1)$ groß ist, passen höchstens $1/\varepsilon = 2d-1$ große Aufgaben in
+einen Bin.
+Ein großer Anteil ist damit ein Vektor $a^B \in \mathbb{N}_0^{\alpha}$ mit
+$\sum_i a^B_i \le 2d-1$, wovon es höchstens $\binom{3d-1}{d}$ viele gibt.
+Das begrenzt $|\mathcal{K}^B|$ auf eine Konstante für festes $d$.
+
+Als triviale obere Schranke für die Binärsuche wird $m^* = n = \sum_{i=1}^{d} u_i$ gesetzt,
+da jede Aufgabe in einem eigenen Bin untergebracht werden kann.
+
+\subsubsection{Schritt 2: Binärsuche nach dem kleinsten zulässigen \texorpdfstring{$m$}{m}}
+
+Für jeden Kandidaten $m$ wird geprüft, ob die folgende MILP-Instanz zulässig ist
+\cite{jansen_solisoba2010}:
+\begin{align*}
+	&\sum_{\substack{a \in \mathcal{K}(\Gamma, C) \\ a^B = b}} x_{a} \leq y_b,
+	\quad \forall\, b \in \mathcal{K}^B \\
+	&\sum_{b \in \mathcal{K}^B} y_b = m  \\
+	&\sum_{b \in \mathcal{K}^B} b_i\, y_b \geq u_i, \quad \forall\, i = 1, \ldots, \alpha  \\
+	&\sum_{a \in \mathcal{K}(\Gamma, C)} a_i\, x_{a} \geq u_i, \quad \forall\, i = \alpha+1, \ldots, d \\
+	&x_{a} \geq 0, \quad y_b \in \mathbb{Z}_{\geq 0} \nonumber
+\end{align*}
+
+\noindent Die Variablen und Nebenbedingungen bedeuten:
+
+\begin{itemize}
+  \item $y_b \in \mathbb{Z}_{\geq 0}$ ist die Anzahl der Bins, deren großer Anteil die Konfiguration
+        $b \in \mathcal{K}^B$ ist.
+  \item $x_{a} \geq 0$ ist die fraktionale Anzahl der Bins mit vollständiger Konfiguration $a$.
+        $x_{a}$ darf gebrochen sein; die Ganzzahligkeit wird erst in Schritt~3 durch Runden hergestellt.
+  \item $a_i$ bzw.\ $b_i$ gibt an, wie viele Aufgaben der Größe $p_i$ in der Konfiguration
+        $a$ bzw.\ $b$ enthalten sind.
+\end{itemize}
+
+Eine Binärsuche über $\{1, \ldots, m^*\}$ findet das kleinste zulässige $m$ in $O(\log n)$
+Gurobi-Aufrufen und speichert es zusammen mit der Lösung $(x^+, y^+)$ als neues $m^*$.
+
+\subsubsection{Schritt 3: Rundung und Konstruktion der Packung}
+
+Die $y^+$-Werte sind ganzzahlig; für jedes $b \in \mathcal{K}^B$ werden $y^+_b$ Bins mit den
+entsprechenden großen Aufgaben belegt.
+Da das MILP $\geq$-Schranken verwendet, kann $y^+$ einzelne Größen öfter als $u_i$-mal nutzen;
+diese Aufgaben werden im Nachhinein vom Algorithmus entfernt.
+Die fraktionalen $x^+$-Werte werden abgerundet: $\tilde{x}_{a} = \lfloor x^+_{a} \rfloor$.
+Für jede Konfiguration $a$ mit $\tilde{x}_{a} \geq 1$ werden $\tilde{x}_{a}$
+Bins mit passendem großem Anteil $a^B$ um die kleinen Aufgaben von $a$ ergänzt.
+Da $\tilde{x}_{a} = \lfloor x^+_{a} \rfloor \le x^+_{a}$, folgt aus Nebenbedingung~1 des MILP, dass für jedes $b$ genügend Bins
+bereitstehen: $\sum_{a^B = b} \tilde{x}_{a} \le y^+_b$.
+Kleine Aufgaben, die nach dem Abrunden nicht abgedeckt sind, werden gesammelt und in einen
+einzigen zusätzlichen Bin gepackt.
+Dass alle Reste dort hineinpassen, folgt aus dem in \cite{jansen_solisoba2010} geführten
+Rundungsargument; die Packung verwendet damit insgesamt höchstens $m^* + 1$ Bins.
+
+\subsection{Theoretische Anwendbarkeit als MULTIFIT-Subroutine}
+\label{sub:anwendbarkeit}
+
+Die äußere Binärsuche in MULTIFIT akzeptiert $C$ genau dann, wenn $\mathrm{J}[\Gamma, C] \le m$.
+Wie schon $\mathrm{FFD}[\Gamma, \cdot\,]$ (Bemerkung~\ref{bem:nicht-monoton}) kann auch
+$\mathrm{J}[\Gamma, \cdot\,]$ nicht monoton fallen; ein Zeuge dafür wird in
+Abschnitt~\ref{sub:hm-garantien} gemessen.
+Anders als bei FFD lässt sich die Abweichung hier jedoch beziffern.
+
+\begin{lemma}[Begrenzte Nicht-Monotonie]
+\label{lem:nichtmonotonie}
+	Für alle $C \in \mathbb{N}$, $\delta \in \mathbb{N}_{\ge 1}$ und alle Instanzen~$\Gamma$ gilt
+  \[
+    \mathrm{J}[\Gamma, C + \delta] \le \mathrm{J}[\Gamma, C] + 1.
+  \]
+\end{lemma}
+
+\begin{proof}
+  Aus der Minimalität von $\mathrm{OPT}[\Gamma, C]$ folgt $\mathrm{J}[\Gamma, C] \ge \mathrm{OPT}[\Gamma, C]$.
+  Da des Weiteren jede Packung bei Kapazität $C$ auch bei Kapazität $C+\delta$ gültig ist, gilt
+  $\mathrm{OPT}[\Gamma, C+\delta] \le \mathrm{OPT}[\Gamma, C]$. Damit folgt
+  \[
+    \mathrm{J}[\Gamma, C+\delta] \;\le\; \mathrm{OPT}[\Gamma, C+\delta] + 1 \;\le\; \mathrm{OPT}[\Gamma, C] + 1 \;\le\; \mathrm{J}[\Gamma, C] + 1. \qedhere
+  \]
+\end{proof}
+
+\begin{korollar}
+\label{kor:verwurf}
+  Gilt $\mathrm{J}[\Gamma, C] \ge m+2$, so existiert keine gültige Packung von $\Gamma$ in $m$ Bins der Kapazität $C$.
+\end{korollar}
+
+\begin{proof}
+  Aus der OPT+1-Garantie von \textcite{jansen_solisoba2010} folgt $\mathrm{J}[\Gamma, C] \le \mathrm{OPT}[\Gamma, C] + 1$,
+  also $\mathrm{OPT}[\Gamma, C] \ge \mathrm{J}[\Gamma, C] - 1 \ge m+1$. \qedhere
+\end{proof}
+
+Lemma~\ref{lem:nichtmonotonie} schließt einen Anstieg nicht aus, begrenzt ihn aber auf~$1$:
+Beim Übergang $C \to C+\delta$ kann höchstens der Fall
+$\mathrm{J}[\Gamma, C] < \mathrm{J}[\Gamma, C+\delta]$ mit Differenz~$1$ eintreten.
+Der Grund liegt in Schritt~3: Die abgerundeten Werte $\lfloor x^+_{a} \rfloor$ hinterlassen kleine Aufgaben, die keiner Konfiguration zugeordnet wurden.
+Passen diese Restobjekte in die verbleibenden Bins,
+so wird kein Extrabin benötigt und $\mathrm{J}[\Gamma, C] = \mathrm{OPT}[\Gamma, C]$.
+Passen sie nicht, entsteht ein zusätzlicher Bin und $\mathrm{J}[\Gamma, C] = \mathrm{OPT}[\Gamma, C]+1$.
+Nicht-Monotonie tritt auf, wenn dieser Übergang bei $C$ und $C+\delta$ unterschiedlich ausfällt,
+obwohl $\mathrm{OPT}[\Gamma, C] = \mathrm{OPT}[\Gamma, C+\delta]$: Werden die Restobjekte bei $C$ verteilt, bei $C+\delta$ jedoch nicht,
+so gilt $\mathrm{J}[\Gamma, C+\delta] = \mathrm{J}[\Gamma, C]+1 > \mathrm{J}[\Gamma, C]$.
+
+Da $\mathrm{J}[\Gamma, C] = m+1$ zweideutig ist - entweder $\mathrm{OPT}[\Gamma, C] = m+1$ (echte Kapazitätsknappheit)
+oder $\mathrm{OPT}[\Gamma, C] = m$ (Rundungsartefakt von Schritt~3) -
+behandelt die Binärsuche diesen Fall konservativ als Ablehnung.
+Bleibt $\mathrm{J}[\Gamma, C] = m+1$ für jede getestete Kapazität, so liefert die Suche keine
+Packung in $m$ Bins; auf den Instanzen aus Abschnitt~\ref{sub:hm-guete} tritt dieser Fall
+nicht auf.
+Wird eine Kapazität akzeptiert, so konvergiert die Suche gleichwohl möglicherweise nicht
+gegen die kleinste zulässige.
+
+\paragraph{Güte und Einschränkungen.}
+Da $\mathrm{J}[\Gamma, C] \le m$ stets $\mathrm{OPT}[\Gamma, C] \le m$ impliziert - nach
+Definition des Optimums gilt $\mathrm{OPT}[\Gamma, C] \le \mathrm{J}[\Gamma, C]$ -,
+akzeptiert die Suche nur Kapazitäten, bei denen tatsächlich eine Packung in $m$ Bins existiert.
+Weil sie $C$ mit $\mathrm{J}[\Gamma, C] = m+1$ (und potenziell $\mathrm{OPT}[\Gamma, C] = m$) verwirft,
+konvergiert sie im schlechtesten Fall gegen den optimalen Makespan auf $m-1$ Maschinen.
+Bezeichnet $C^{*}_{\max}(\Gamma, m')$ den optimalen Makespan von $\Gamma$ auf $m'$ Maschinen -
+insbesondere $C^{*}_{\max}(\Gamma) = C^{*}_{\max}(\Gamma, m)$ -, so trägt folgende Kette:
+Für $C \ge C^{*}_{\max}(\Gamma, m-1)$ ist $\mathrm{OPT}[\Gamma, C] \le m-1$ nach
+Lemma~\ref{lem:dualitaet}, also $\mathrm{J}[\Gamma, C] \le m$ nach der $\mathrm{OPT}+1$-Garantie
+- solche Kapazitäten akzeptiert die Suche stets.
+Liegt $C^{*}_{\max}(\Gamma, m-1)$ im Startintervall, so ist die im Grenzwert $k \to \infty$
+resultierende Güte damit durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$ beschränkt;
+bei endlichem $k$ kommt der Term $2^{-k}$ hinzu.
+Bestimmt in beiden Fällen die Durchschnittslast das Optimum, gilt also
+$C^{*}_{\max}(\Gamma, m) \approx \sum_j p_j/m$ und
+$C^{*}_{\max}(\Gamma, m-1) \approx \sum_j p_j/(m-1)$, so ist
+\[
+  \frac{C^{*}_{\max}(\Gamma, m-1)}{C^{*}_{\max}(\Gamma, m)}
+  \;\approx\; \frac{\sum_j p_j/(m-1)}{\sum_j p_j/m} \;=\; \frac{m}{m-1},
+\]
+und $m/(m-1) < 13/11$ gilt für alle $m \ge 7$.
+Das ist eine Abschätzung unter dieser Annahme und keine Schranke: Sie setzt voraus, dass beide
+Optima von der Durchschnittslast bestimmt werden, und trägt nicht, sobald einzelne große Aufgaben
+sie nach oben drücken.
+Im Allgemeinen kann $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$ bis zu $2$ betragen:
+$m$ Aufgaben der Größe~$1$ auf $m$ Maschinen liefern $C^{*}_{\max}(\Gamma, m) = 1$ und $C^{*}_{\max}(\Gamma, m-1) = 2$.
+
+Der Algorithmus setzt schließlich zwingend voraus, dass $d$ konstant ist.
+Nur dann ist die Laufzeit polynomiell in $\log n$; für allgemeines Scheduling mit $d = n$ macht
+die doppelt exponentielle Abhängigkeit den Algorithmus praktisch unbrauchbar.
+Anwendbar bleibt das Verfahren daher nur für High-Multiplicity-Instanzen mit kleinem $d$;
+Abschnitt~\ref{sub:hm-laufzeit} misst den Bereich $d \le 6$.
+
+\subsection{Modifikation zu einem \texorpdfstring{$\varepsilon$}{ε}-dualen Approximationsalgorithmus}
+\label{sub:eps_dual}
+
+\subsubsection{Primale und duale Approximation}
+
+Approximationsalgorithmen für Bin Packing können die Gütegarantie auf zwei Weisen erfüllen.
+Der \emph{primale} Ansatz hält die Kapazität~$C$ ein und verwendet dafür bis zu
+$(1+\varepsilon)\cdot\mathrm{OPT}[\Gamma, C]$ Bins.
+Der \emph{duale} Ansatz kehrt diese Priorität um: Er verwendet höchstens
+$\mathrm{OPT}[\Gamma, C]$ Bins und lässt dafür eine Kapazitätsüberschreitung um den
+Faktor $(1+\varepsilon)$ zu.
+
+\begin{definition}[$\varepsilon$-dualer Approximationsalgorithmus {\normalfont\cite{hochbaum_shmoys_1987}}]
+\label{def:eps-dual}
+  Ein Polynomialzeitalgorithmus~$\mathcal{A}$ heißt \emph{$\varepsilon$-dualer Approxi\-mationsalgorithmus}
+  für Bin Packing, wenn er für jede Instanz~$\Gamma$ und jede Kapazität $C \ge p_{\max}$ eine
+  Packung berechnet, die
+  \begin{enumerate}[label=(\roman*)]
+    \item höchstens $\mathrm{OPT}[\Gamma, C]$ Bins verwendet, und
+    \item jeden Bin mit Gesamtlast $\le (1+\varepsilon)\, C$ befüllt.
+  \end{enumerate}
+\end{definition}
+
+Der duale Ansatz ist das entscheidende Werkzeug für das Makespan-Problem.
+Der Zusammenhang beider Optima ist genau die Dualität aus Lemma~\ref{lem:dualitaet},
+$\mathrm{OPT}[\Gamma, C] \le m \iff C^{*}_{\max}(\Gamma) \le C$;
+\textcite{hochbaum_shmoys_1987} formulieren sie über skalierte Aufgabengrößen.
+Ein $\varepsilon$-dualer Bin-Packing-Algorithmus lässt sich daher direkt in eine Binärsuche über
+die Kapazität einbetten: Sie halbiert das Kapazitätsintervall und übernimmt jede Kapazität, bei
+der er höchstens $m$ Bins ausgibt.
+Diese Prozedur ist strukturell identisch mit MULTIFITs Binärsuche.
+
+\begin{theorem}[Hochbaum und Shmoys {\normalfont\cite{hochbaum_shmoys_1987}}, Theorem~1]
+\label{thm:hs-makespan}
+  Die Binärsuche über die Kapazität benutze einen $\varepsilon$-dualen Bin-Packing-Algorithmus als
+  Subroutine; ihr Startintervall enthalte $C^{*}_{\max}(\Gamma)$ und seine Breite übersteige
+  $C^{*}_{\max}(\Gamma)$ nicht.
+  Wird sie nach $k$~Iterationen abgebrochen, so besitzt der erzeugte Schedule einen Makespan von
+  höchstens
+  \[
+    (1 + \varepsilon)(1 + 2^{-k})\cdot C^{*}_{\max}(\Gamma).
+  \]
+\end{theorem}
+
+Für $k \to \infty$ konvergiert die Güte gegen $(1+\varepsilon)\cdot C^{*}_{\max}(\Gamma)$.
+Die Konstruktion eines $\varepsilon$-dualen Bin-Packing-Algorithmus ist damit der entscheidende Baustein.
+
+\subsubsection{Jansen-Dual: Modifikation des Rundungsschritts}
+
+Der Algorithmus aus Abschnitt~\ref{sub:anwendbarkeit} gibt höchstens $\mathrm{OPT}[\Gamma, C]+1$
+Bins aus; der Extrabin entsteht in Schritt~3, weil die verbliebenen kleinen Aufgaben dort
+in einen zusätzlichen Bin der Kapazität~$C$ gepackt werden \cite{jansen_solisoba2010}.
+Die folgende Modifikation verteilt diese Aufgaben stattdessen auf bestehende Bins und eliminiert
+den Extrabin - auf Kosten einer geringen Kapazitätsüberschreitung.
+
+\medskip\noindent
+\textbf{Jansen-Dual (modifizierter Schritt~3).}
+Schritte~1 und~2 sind identisch zum ursprünglichen Algorithmus.
+Schritt~3 ändert sich wie folgt:
+\begin{enumerate}[label=\arabic*.]
+  \item Runde ab: $\bar{x}_{a} = \lfloor x^+_{a} \rfloor$ für alle Konfigurationen~$a$.
+  \item Weise jedem der $m^*$ Bins seine große Konfiguration und die abgerundeten kleinen Aufgaben zu.
+  \item Sammle die verbliebenen kleinen Aufgaben $L$ (nicht abgedeckt durch die gerundeten $\bar{x}$-Werte);
+        nach Lemma~3.1 in \cite{jansen_solisoba2010} gilt $|L| \le 2d-1$
+        (das Lemma gilt hier unverändert, da die Schranke allein aus dem Rundungsargument der Schritte~1 und~2 folgt, die gegenüber dem Original unverändert sind).
+  \item Platziere jede Aufgabe aus~$L$ in einem Bin mit aktueller Last $< C$.
+  \item Gib die $m^*$ Bins aus - kein zusätzlicher Bin wird geöffnet.
+\end{enumerate}
+
+\begin{lemma}[Jansen-Dual ist $\varepsilon$-dual für $\varepsilon = 1/(2d-1)$]
+\label{lem:jansen-dual}
+  Sei $\Gamma$ eine Instanz mit $d$~verschiedenen Größen, $C \ge p_{\max}$ eine Kapazität
+  und $\varepsilon = 1/(2d-1)$; $d$ sei konstant, sodass die Laufzeit nach
+  Abschnitt~\ref{sub:jansen-laufzeit} polynomiell ist.
+  Jansen-Dual berechnet eine Packung aller Aufgaben von~$\Gamma$, für die gilt:
+  \begin{enumerate}[label=(\roman*)]
+    \item die Anzahl der verwendeten Bins beträgt höchstens $\mathrm{OPT}[\Gamma, C]$;
+    \item jeder Bin trägt eine Gesamtlast von höchstens $(1+\varepsilon)\, C$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\textit{(i) Binzahl $\le \mathrm{OPT}[\Gamma, C]$.}\;
+$m^*$ ist das kleinste $m$, für das das MILP in Schritt~2 zulässig ist.
+Da die optimale Packung in $\mathrm{OPT}[\Gamma, C]$ Bins eine zulässige MILP-Lösung liefert,
+ist das MILP für $m = \mathrm{OPT}[\Gamma, C]$ zulässig; daher gilt $m^* \le \mathrm{OPT}[\Gamma, C]$ per Definition.
+Jansen-Dual öffnet keinen zusätzlichen Bin und verwendet daher genau $m^* \le \mathrm{OPT}[\Gamma, C]$ Bins.
+
+\textit{(ii) Gesamtlast jedes Bins $\le (1+\varepsilon)\, C$.}\;
+Jede Konfiguration~$a$ erfüllt $\sum_i p_i\, a_i \le C$,
+weshalb jeder Bin nach dem Abrunden in Schritt~3.1 eine Last $\le C$ trägt.
+Die verbleibenden Aufgaben aus~$L$ sind ausschließlich kleine Aufgaben mit Größe $< \varepsilon C$.
+
+Aus der Zulässigkeit des MILPs folgt zunächst, dass die Gesamtgröße aller Aufgaben höchstens
+$m^* C$ beträgt.
+Für $b \in \mathcal{K}^B$ sei dazu $g_b = \sum_{i \le \alpha} p_i\, b_i$ die Größe der großen
+Aufgaben eines Bins mit großem Anteil~$b$; wegen $b \in \mathcal{K}^B$ ist $g_b \le C$.
+Die Bedarfszeilen der großen Größen liefern
+\[
+  \sum_{i \le \alpha} p_i\, u_i \;\le\; \sum_{i \le \alpha} p_i \sum_{b} b_i\, y_b
+  \;=\; \sum_{b} g_b\, y_b .
+\]
+Jede Konfiguration~$a$ hält die Kapazität ein, weshalb ihr kleiner Anteil
+$\sum_{i > \alpha} p_i\, a_i \le C - g_{a^B}$ erfüllt.
+Mit den Bedarfszeilen der kleinen Größen und der ersten Nebenbedingung folgt
+\[
+  \sum_{i > \alpha} p_i\, u_i
+  \;\le\; \sum_{a} \Bigl( \sum_{i > \alpha} p_i\, a_i \Bigr) x_{a}
+  \;\le\; \sum_{b} \bigl( C - g_b \bigr) \sum_{a^B = b} x_{a}
+  \;\le\; \sum_{b} \bigl( C - g_b \bigr) y_b .
+\]
+Addiert man beide Ungleichungen, so heben sich die $g_b$ auf und es bleibt
+\[
+  \sum_{i=1}^{d} p_i\, u_i \;\le\; C \sum_{b} y_b \;=\; m^* C .
+\]
+Entscheidend ist dabei, dass große und kleine Aufgaben desselben Bins sich \emph{eine} Kapazität
+teilen; schätzt man die beiden Bedarfszeilen unabhängig voneinander ab, so liefern sie nur
+$2\, m^* C$ und tragen die folgende Schlussweise nicht.
+
+Angenommen nun, beim Platzieren einer Aufgabe $s \in L$ in Schritt~3.4 wäre kein Bin
+mit aktueller Last $< C$ mehr vorhanden, d.\,h.\ alle $m^*$ Bins trügen eine Last von mindestens~$C$.
+Dann betrüge die Gesamtlast der Bins mindestens $m^* C$.
+Da~$s$ noch nicht platziert ist, ist sie zugleich strikt kleiner als die Gesamtgröße aller
+Aufgaben, sodass
+\[
+  m^* C \;<\; \sum_{i=1}^{d} p_i\, u_i
+\]
+folgte - im Widerspruch zur soeben gezeigten Ungleichung.
+
+Also findet Schritt~3.4 stets einen Bin mit aktueller Last $< C$;
+nach dem Einfügen von~$s$ ist die Last dieses Bins kleiner als $C + \varepsilon C = (1+\varepsilon)\, C$.
+
+Alle Aufgaben von~$\Gamma$ werden gepackt: große und abgerundete kleine Aufgaben durch Schritt~3.2,
+die verbliebenen kleinen Aufgaben aus~$L$ durch Schritt~3.4.
+\end{proof}
+
+\begin{korollar}[MULTIFIT mit Jansen-Dual]
+\label{kor:multifit-jansen-dual}
+  MULTIFIT mit Jansen-Dual als Subroutine liefert nach $k$~Iterationen
+  der Binärsuche einen Schedule mit Makespan von höchstens
+  \[
+    (1+\varepsilon)(1+2^{-k})\cdot C^{*}_{\max}(\Gamma),
+    \qquad \varepsilon = \frac{1}{2d-1}.
+  \]
+\end{korollar}
+
+\begin{proof}
+  Nach Lemma~\ref{lem:jansen-dual} ist Jansen-Dual ein $\varepsilon$-dualer Approximationsalgorithmus
+  für Bin Packing.
+  MULTIFITs Startintervall \eqref{eq:startintervall} erfüllt die Voraussetzung von
+  Theorem~\ref{thm:hs-makespan}: Es enthält $C^{*}_{\max}(\Gamma)$ nach
+  Lemma~\ref{lem:startintervall}(a) und~(c), und für seine Breite gilt
+  \[
+    c_{\mathrm{high}}^{(0)} - c_{\mathrm{low}}^{(0)}
+    \;=\; \min\Bigl( \tfrac{1}{m}\textstyle\sum_j p_j,\; p_{\max} \Bigr)
+    \;\le\; C^{*}_{\max}(\Gamma)
+  \]
+  nach Lemma~\ref{lem:untere-schranken}.
+  Die Gütegarantie folgt damit aus Theorem~\ref{thm:hs-makespan}.
+\end{proof}
+
+\paragraph{Implementierungsoptimierung: Wegfall der inneren Binärsuche.}
+Jansens Schritt~2 sucht das minimale $m^*$ per Binärsuche und braucht dafür $O(\log n)$ MILP-Aufrufe.
+Im MULTIFIT-Kontext ist die Maschinenzahl~$m$ jedoch von außen bekannt und fest.
+Eine Subroutine wie FFD berechnet (approximativ) eine Packung mit möglichst wenigen Bins, und
+MULTIFIT vergleicht deren Binzahl mit~$m$.
+Für diesen Vergleich genügt aber schon die Antwort auf die Frage, ob eine Packung in höchstens
+$m$ Bins der Kapazität~$C$ gefunden wird.
+Diese Frage beantwortet ein \emph{einziger} MILP-Aufruf mit der Nebenbedingung
+$\sum_{b} y_b \leq m$:
+\begin{itemize}[nosep]
+  \item \textbf{Lösbar:} Die Packung wird wie in Schritt~3 konstruiert und zurückgegeben.
+  \item \textbf{Unlösbar:} $C$ ist zu klein; MULTIFIT erhöht die Kapazität.
+\end{itemize}
+Diese Variante minimiert die Binzahl nicht mehr, erfüllt also Eigenschaft~(i) von
+Definition~\ref{def:eps-dual} nicht: Sie gibt bis zu~$m$ Bins aus, auch wenn
+$\mathrm{OPT}[\Gamma, C] < m$ ist.
+Erhalten bleibt genau das, was Theorem~\ref{thm:hs-makespan} für die Binärsuche braucht:
+Der Aufruf ist für jedes $C \ge C^{*}_{\max}(\Gamma)$ lösbar, gibt höchstens $m$ Bins aus und
+hält die Last~$\le (1+\varepsilon)\,C$.
+Für die Lastschranke trägt das Widerspruchsargument aus dem Beweis von
+Lemma~\ref{lem:jansen-dual} mit~$m$ an Stelle von~$m^*$, sofern die Lösung alle~$m$ Bins
+belegt; belegt sie weniger, ist die Last des am wenigsten gefüllten Bins erst recht $< C$.
+Die Anzahl der MILP-Aufrufe reduziert sich dadurch von
+$O(k \log n)$ auf $O(k)$, wobei $k$ die Anzahl der MULTIFIT-Iterationen ist.
+
+Diese Verkürzung ist an die Modifikation gebunden und lässt sich nicht auf den unveränderten
+$\mathrm{OPT}+1$-Algorithmus übertragen.
+Dort entscheidet über die Annahme einer Kapazität der Wert $\mathrm{J}[\Gamma, C]$, und der ist
+$m^*$ oder $m^*+1$: Der zusätzliche Bin aus Schritt~3 wird genau dann geöffnet, wenn nach dem
+Abrunden der $x^+$-Werte kleine Aufgaben übrig bleiben.
+Ein einzelner Aufruf mit dem festen $m$ an Stelle von $m^*$ liefert in diesem Fall $m+1$ Bins
+und verwirft die Kapazität, obwohl das MILP für $m$ Bins lösbar war.
+Die Entscheidung hinge dann nicht mehr an der Lösbarkeit, sondern am Rundungsrest.
+Erst die $\varepsilon$-duale Fassung, die diese Reste nach Lemma~\ref{lem:jansen-dual} auf die
+bereits geöffneten Bins verteilt, macht den zusätzlichen Bin - und mit ihm die Suche nach
+$m^*$ - entbehrlich.
+Der Vergleich in Abschnitt~\ref{sec:hm} misst beide Fassungen in genau dieser Form: den
+$\mathrm{OPT}+1$-Algorithmus mit innerer Binärsuche, seine $\varepsilon$-duale Variante ohne.
+
+\section{Das Konfigurations-LP von Gilmore und Gomory als Subroutine}
+\label{sec:gg-lp}
+
+FFD und MFFD sind kombinatorische Verfahren, welche die Aufgaben nach festen Regeln
+nacheinander platzieren; der Algorithmus von Jansen und Solis-Oba
+löst dagegen ein ganzzahliges Programm über Konfigurationen und rundet dessen Lösung.
+Dieselbe Modellierung liegt schon dem ältesten Zugang zum Bin Packing zugrunde, dem linearen
+Programm über Konfigurationen - kurz \emph{Konfigurations-LP} - von
+\textcite{gilmore_gomory1961,gilmore_gomory1963}.
+Dieser Abschnitt beschreibt das Modell, seine Rundung zu einer zulässigen Packung und
+den Einbau des Ergebnisses als Subroutine in MULTIFITs Binärsuche.
+
+\subsection{Das Konfigurationsmodell}
+\label{sub:gg-modell}
+
+Grundlage ist dieselbe High-Multiplicity-Darstellung wie in Abschnitt~\ref{sec:jansen}: eine
+Instanz $\Gamma$ mit $d$ verschiedenen Größen $p_1 > \cdots > p_d > 0$ und Vielfachheiten
+$u_1, \ldots, u_d$, eine feste Kapazität $C$ und die Konfigurationsmenge
+$\mathcal{K}(\Gamma, C)$ aus Definition~\ref{def:konfiguration}.
+\textcite{gilmore_gomory1961} nennen eine Konfiguration ein \emph{Schnittmuster}.
+Mit einer Variablen $x_a$ je Konfiguration - der Anzahl der nach Muster $a$ gepackten Bins -
+lautet das ganzzahlige Programm (IP)
+\begin{equation}
+  \min \sum_{a \in \mathcal{K}(\Gamma, C)} x_a
+  \quad\text{u.d.N.}\quad
+  \sum_{a \in \mathcal{K}(\Gamma, C)} a_i\, x_a \;\ge\; u_i \ \ (i = 1, \ldots, d),
+  \qquad x_a \in \mathbb{Z}_{\ge 0}.
+  \tag{IP}
+  \label{eq:gg-ip}
+\end{equation}
+Die $\ge$-Form ist keine Abschwächung: Deckt eine Lösung eine Größe öfter ab als nötig, so
+entfernt man die überzähligen Aufgaben aus den betroffenen Bins; das Ergebnis ist wieder eine
+Auswahl von Konfigurationen und braucht nicht mehr Bins als zuvor.
+Umgekehrt liefert jede Packung in $k$ Bins eine zulässige Lösung von \eqref{eq:gg-ip} mit
+Zielfunktionswert $k$.
+Der Optimalwert von \eqref{eq:gg-ip} ist daher genau $\mathrm{OPT}[\Gamma, C]$ aus
+Definition~\ref{def:binpacking}.
+
+\begin{definition}[Konfigurations-LP]
+\label{def:gg-lp}
+Ersetzt man in \eqref{eq:gg-ip} die Bedingung $x_a \in \mathbb{Z}_{\ge 0}$ durch $x_a \ge 0$, so
+entsteht das \emph{Konfigurations-LP}
+\begin{equation}
+  \min \sum_{a \in \mathcal{K}(\Gamma, C)} x_a
+  \quad\text{u.d.N.}\quad
+  \sum_{a \in \mathcal{K}(\Gamma, C)} a_i\, x_a \;\ge\; u_i \ \ (i = 1, \ldots, d),
+  \qquad x_a \ge 0 ;
+  \tag{LP}
+  \label{eq:gg-lp}
+\end{equation}
+sein Optimalwert wird mit $\mathrm{LP}[\Gamma, C]$ bezeichnet.
+\end{definition}
+
+Das zugehörige duale Programm (D) lautet
+\begin{equation}
+  \max \sum_{i=1}^{d} u_i\, y_i
+  \quad\text{u.d.N.}\quad
+  \sum_{i=1}^{d} a_i\, y_i \;\le\; 1 \ \ \text{für alle } a \in \mathcal{K}(\Gamma, C),
+  \qquad y \ge 0 .
+  \tag{D}
+  \label{eq:gg-dual}
+\end{equation}
+Es hat eine Nebenbedingung je Konfiguration, also $q$ Stück.
+Genau hier setzt der Beitrag von \textcite{gilmore_gomory1961,gilmore_gomory1963} an: Statt das LP
+mit allen $q$ Spalten aufzustellen, löst man es über einer kleinen Spaltenteilmenge, liest die
+Duallösung $y^\ast$ ab und sucht eine verletzte Nebenbedingung von \eqref{eq:gg-dual} durch
+\[
+  \max \Big\{ \textstyle\sum_{i=1}^{d} y^\ast_i\, a_i \;\Big|\;
+  \sum_{i=1}^{d} p_i\, a_i \le C,\ \ 0 \le a_i \le u_i,\ \ a \in \mathbb{Z}^d \Big\},
+\]
+also durch ein beschränktes Rucksackproblem.
+Ist der Optimalwert größer als $1$, so liefert das zugehörige $a$ eine neue Spalte und das
+eingeschränkte LP wird erneut gelöst; ist er höchstens $1$, so ist $y^\ast$ für
+\eqref{eq:gg-dual} zulässig und das eingeschränkte LP bereits optimal.
+Dieses Verfahren heißt \emph{Spaltengenerierung}.
+
+Für die vorliegende Arbeit wird es nicht benötigt.
+Ist $d$ konstant, so lässt sich $\mathcal{K}(\Gamma, C)$ vollständig aufzählen: Wegen
+$a_i \le \min(\lfloor C/p_i \rfloor, u_i)$ gilt
+$q \le \prod_{i=1}^{d} \big(\min(\lfloor C/p_i \rfloor, u_i) + 1\big)$,
+für festes $d$ also ein in $C$ polynomieller Wert.
+Die Spaltengenerierung ist genau das Werkzeug, mit dem das Modell auch dann handhabbar bleibt,
+wenn $d$ mit $n$ wächst und die Aufzählung ausscheidet.
+
+\subsection{Eigenschaften des Konfigurations-LPs}
+\label{sub:gg-eigenschaften}
+
+\begin{lemma}[Schranken und Monotonie]
+\label{lem:gg-schranken}
+Für jede Instanz $\Gamma$ und jede Kapazität $C \ge p_{\max}$ gilt
+\begin{enumerate}[label=(\alph*), nosep]
+  \item $\big\lceil \mathrm{LP}[\Gamma, C] \big\rceil \le \mathrm{OPT}[\Gamma, C]$,
+  \item $\mathrm{LP}[\Gamma, C] \ge \big(\sum_{j=1}^{n} p_j\big) / C$,
+  \item $C \mapsto \mathrm{LP}[\Gamma, C]$ ist monoton fallend.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(a) \eqref{eq:gg-lp} entsteht aus \eqref{eq:gg-ip} durch Weglassen der
+Ganzzahligkeitsbedingung, also ist $\mathrm{LP}[\Gamma, C] \le \mathrm{OPT}[\Gamma, C]$;
+da $\mathrm{OPT}[\Gamma, C]$ ganzzahlig ist, folgt die Aussage.
+
+(b) Jede Konfiguration $a$ erfüllt $\sum_i a_i p_i \le C$.
+Für eine zulässige Lösung $x$ folgt
+$\sum_j p_j = \sum_i u_i p_i \le \sum_i p_i \sum_a a_i x_a
+ = \sum_a x_a \sum_i a_i p_i \le C \sum_a x_a$.
+
+(c) Für $C \le C'$ ist jede Konfiguration zur Kapazität $C$ auch eine zur Kapazität $C'$; die
+Vielfachheitsschranken $a_i \le u_i$ hängen nicht von der Kapazität ab.
+Der zulässige Bereich des LPs zu $C'$ enthält damit denjenigen zu $C$ (aufgefüllt mit Nullen),
+und das Minimum kann nicht größer werden.
+\end{proof}
+
+Teil (b) besagt, dass das LP mindestens so scharf ist wie die Volumenschranke, aus der auch die
+untere Intervallgrenze $c_{\mathrm{low}}^{(0)}$ in \eqref{eq:startintervall} stammt.
+Teil (c) ist bemerkenswert im Licht von Bemerkung~\ref{bem:nicht-monoton}: Die \emph{Schranke}
+$\mathrm{LP}[\Gamma, \cdot\,]$ fällt monoton, während $\mathrm{FFD}[\Gamma, \cdot\,]$ das nicht tut.
+Für die gerundete Binzahl aus Abschnitt~\ref{sub:gg-rundung} wird hier keine Monotonie
+behauptet; sie hängt von der jeweils gewählten Optimallösung ab.
+
+Der eigentliche Hebel für die Rundung ist die geringe Zeilenzahl des LPs.
+
+\begin{lemma}[Träger einer Optimalecke]
+\label{lem:gg-ecke}
+Das Konfigurations-LP besitzt eine optimale Ecke, und in jeder Ecke $x$ des zulässigen Bereichs
+gilt $|\{a : x_a > 0\}| \le d$.
+\end{lemma}
+
+\begin{proof}
+Der zulässige Bereich ist durch $d$ Bedarfszeilen und $q$ Vorzeichenbedingungen $x_a \ge 0$
+beschrieben.
+Eine \emph{Ecke} ist ein zulässiger Punkt, in dem $q$ linear unabhängige dieser Ungleichungen mit
+Gleichheit erfüllt sind - gleichwertig: ein zulässiger Punkt, der sich nicht als echte
+Konvexkombination zweier anderer zulässiger Punkte schreiben lässt.
+Dass ein lösbares lineares Programm mit beschränkter Zielfunktion stets eine Optimallösung in einer
+Ecke besitzt, ist Standard \cite[Kap.~11]{williamson_shmoys2011}.
+Höchstens $d$ der $q$ straffen Ungleichungen können Bedarfszeilen sein; also sind mindestens
+$q - d$ Vorzeichenbedingungen straff und ebenso viele Variablen gleich null.
+\end{proof}
+
+\noindent
+Für das Konfigurations-LP des Bin Packing ist das die übliche Begründung des Rundungsverlusts;
+\textcite[Abschnitt~4.6]{williamson_shmoys2011} verwenden dasselbe Argument.
+
+\subsection{Rundung zu einer zulässigen Packung}
+\label{sub:gg-rundung}
+
+Aus einer optimalen Ecke $x^\ast$ wird in drei Schritten eine Packung gebaut.
+Sei $F = \{a : x^\ast_a \notin \mathbb{Z}\}$ die Menge der fraktionalen Einträge; nach
+Lemma~\ref{lem:gg-ecke} ist $|F| \le d$.
+
+\begin{enumerate}[label=\textit{Schritt~\arabic*.}, leftmargin=*, itemsep=3pt]
+  \item \emph{Abrunden.} Für jede Konfiguration $a$ werden $\lfloor x^\ast_a \rfloor$ Bins nach
+    Muster $a$ gepackt. Weil \eqref{eq:gg-ip} in $\ge$-Form vorliegt, kann eine Größe dabei
+    überdeckt werden; sind von Größe $p_i$ keine Aufgaben mehr übrig, so bleiben die
+    entsprechenden Plätze des Musters unbesetzt.
+  \item \emph{Restbedarf bestimmen.} Es sei
+    $r_i = u_i - \sum_{a} \lfloor x^\ast_a \rfloor\, a_i$ für $r_i > 0$ und $r_i = 0$ sonst; das
+    sind die nach Schritt~1 noch unplatzierten Aufgaben.
+  \item \emph{Restbedarf packen.} Der Restbedarf wird auf zwei Arten gepackt - einmal mit einem
+    Bin je fraktionaler Konfiguration $a \in F$, gefüllt nach deren Muster, und einmal mit FFD -
+    und die kleinere der beiden Packungen wird verwendet.
+\end{enumerate}
+
+\noindent
+Die Anzahl der insgesamt erzeugten Bins wird mit $\mathrm{GG}[\Gamma, C]$ bezeichnet.
+
+\begin{lemma}[Rundungsschranke]
+\label{lem:gg-rundung}
+Schritt~3 packt den Restbedarf vollständig, und es gilt
+\[
+  \mathrm{OPT}[\Gamma, C] \;\le\; \mathrm{GG}[\Gamma, C] \;\le\;
+  \big\lceil \mathrm{LP}[\Gamma, C] \big\rceil + |F| - 1 \;\le\;
+  \mathrm{OPT}[\Gamma, C] + d - 1,
+\]
+sofern $F \neq \emptyset$; andernfalls ist
+$\mathrm{GG}[\Gamma, C] = \mathrm{LP}[\Gamma, C] = \mathrm{OPT}[\Gamma, C]$.
+\end{lemma}
+
+\begin{proof}
+Die untere Schranke ist klar, da das Verfahren eine zulässige Packung liefert.
+
+\emph{Der Restbedarf passt in $|F|$ Bins.}
+Aus der Zulässigkeit von $x^\ast$ folgt für jedes $i$
+\[
+  r_i \;\le\; u_i - \sum_{a} \lfloor x^\ast_a \rfloor\, a_i
+  \;\le\; \sum_{a} \big(x^\ast_a - \lfloor x^\ast_a \rfloor\big)\, a_i
+  \;=\; \sum_{a \in F} \big(x^\ast_a - \lfloor x^\ast_a \rfloor\big)\, a_i
+  \;<\; \sum_{a \in F} a_i ,
+\]
+wobei die letzte Ungleichung strikt ist, falls die rechte Summe positiv ist.
+Da beide Seiten ganzzahlig sind, gilt $r_i \le \sum_{a \in F} a_i$ für alle $i$.
+Verteilt man den Restbedarf auf $|F|$ Bins, von denen der zu $a \in F$ gehörige höchstens $a_i$
+Aufgaben der Größe $p_i$ aufnimmt, so wird jede verbliebene Aufgabe platziert und keine
+Kapazität überschritten.
+Die in Schritt~3 gewählte Packung ist höchstens so groß, also
+$\mathrm{GG}[\Gamma, C] \le \sum_{a} \lfloor x^\ast_a \rfloor + |F|$.
+
+\emph{Die obere Schranke.}
+Für $a \notin F$ ist $\lceil x^\ast_a \rceil = \lfloor x^\ast_a \rfloor = x^\ast_a$, für $a \in F$
+ist $\lceil x^\ast_a \rceil = \lfloor x^\ast_a \rfloor + 1 < x^\ast_a + 1$.
+Summieren liefert
+\[
+  \sum_{a} \lfloor x^\ast_a \rfloor + |F| \;=\; \sum_{a} \lceil x^\ast_a \rceil
+  \;<\; \mathrm{LP}[\Gamma, C] + |F| \;\le\; \lceil \mathrm{LP}[\Gamma, C] \rceil + |F| .
+\]
+Die linke Seite ist ganzzahlig und die erste Ungleichung strikt, also ist sie höchstens
+$\lceil \mathrm{LP}[\Gamma, C] \rceil + |F| - 1$.
+Mit Lemma~\ref{lem:gg-schranken}(a) und $|F| \le d$ folgt die letzte Abschätzung.
+Ist $F = \emptyset$, so ist $x^\ast$ ganzzahlig, das Verfahren packt genau
+$\mathrm{LP}[\Gamma, C]$ Bins, und mit Lemma~\ref{lem:gg-schranken}(a) ist dieser Wert optimal.
+\end{proof}
+
+\begin{bemerkung}[Warum nicht einfach aufrunden]
+\label{bem:gg-aufrunden}
+Die naheliegende Variante, jeden Eintrag aufzurunden und $\sum_a \lceil x^\ast_a \rceil$ Bins zu
+packen, erfüllt dieselbe Schranke - die Rechnung im Beweis ist genau diese Summe.
+Sie ist aber nie besser: Das Abrunden erzeugt $\sum_a \lfloor x^\ast_a \rfloor$ Bins, und der
+Restbedarf braucht höchstens $|F|$ weitere, während das Aufrunden diese $|F|$ Bins immer belegt.
+Deshalb wird hier abgerundet.
+\end{bemerkung}
+
+\subsection{Einsatz in MULTIFIT}
+\label{sub:gg-multifit}
+
+Als Subroutine erhält das Verfahren dieselbe Schnittstelle wie FFD und MFFD: Eingabe sind die
+Aufgaben von $\Gamma$ und eine Kapazität $C$, Ausgabe ist eine Packung.
+MULTIFIT akzeptiert $C$ genau dann, wenn $\mathrm{GG}[\Gamma, C] \le m$ gilt.
+Weil die Kapazitäten ganzzahlig sein müssen - $\mathcal{K}(\Gamma, C)$ ist nur für ganzzahliges
+$C$ aufzählbar - wird die Variante der Binärsuche mit ganzzahligen Kapazitäten verwendet.
+
+Gegenüber FFD ändert sich die Bedeutung einer Ablehnung.
+Wegen $\lceil \mathrm{LP}[\Gamma, C] \rceil \le \mathrm{OPT}[\Gamma, C] \le \mathrm{GG}[\Gamma, C]$
+zerfällt der Fall $\mathrm{GG}[\Gamma, C] > m$ in zwei Teile:
+\begin{itemize}[leftmargin=*, itemsep=3pt]
+  \item Ist bereits $\lceil \mathrm{LP}[\Gamma, C] \rceil > m$, so ist
+    $\mathrm{OPT}[\Gamma, C] > m$, also nach Lemma~\ref{lem:dualitaet} $C < C^{*}_{\max}(\Gamma)$.
+    Die Ablehnung ist dann \emph{zertifiziert}: Die untere Intervallgrenze wird auf einen Wert
+    gesetzt, der nachweislich unterhalb des optimalen Makespans liegt.
+    FFD zertifiziert eine Ablehnung erst ab $\mathrm{FFD}[\Gamma, C] > \tfrac{11}{9}\,m + \tfrac{6}{9}$:
+    Nach \eqref{eq:ffd-guete} folgt daraus $\mathrm{OPT}[\Gamma, C] > m$.
+    Im hier entscheidenden Fall $\mathrm{FFD}[\Gamma, C] = m+1$ folgt dagegen nichts
+    über $\mathrm{OPT}[\Gamma, C]$.
+  \item Ist $\lceil \mathrm{LP}[\Gamma, C] \rceil \le m < \mathrm{GG}[\Gamma, C]$, so bleibt offen,
+    ob $C$ zulässig ist; die Rundung hat lediglich keine Packung mit $\le m$ Bins geliefert.
+    Dieser Fall wird wie eine Ablehnung behandelt, damit die von MULTIFIT zurückgegebene Partition
+    stets zur aktuellen oberen Intervallgrenze gehört.
+\end{itemize}
+Die Differenz $\mathrm{GG}[\Gamma, C] - \lceil \mathrm{LP}[\Gamma, C] \rceil$ misst damit genau
+den Verlust, den die Rundung gegenüber der LP-Schranke verursacht.
+
+Eine Gütegarantie für den Makespan überträgt sich daraus nicht.
+Die Schranke von \textcite{cao1995} für MULTIFIT+FFD beruht auf
+Implikation~\eqref{eq:ffd-akzeptiert}: Oberhalb von $r_m \cdot C^{*}_{\max}(\Gamma)$ kommt FFD
+stets mit $m$ Bins aus, die Binärsuche akzeptiert dort also jede Kapazität und kann ihre obere
+Intervallgrenze bis auf $r_m \cdot C^{*}_{\max}(\Gamma)$ absenken.
+Damit sich diese Schlussweise übertragen lässt, müsste eine Konstante $r$ existieren, sodass
+$C \ge r \cdot C^{*}_{\max}(\Gamma)$ stets $\mathrm{GG}[\Gamma, C] \le m$ nach sich zieht.
+Lemma~\ref{lem:gg-rundung} liefert für $C \ge C^{*}_{\max}(\Gamma)$ aber nur
+$\mathrm{GG}[\Gamma, C] \le m + d - 1$ und lässt damit gerade die $d-1$ Bins zu, die das
+Akzeptanzkriterium nicht mehr zulässt.
+Der additive Term hängt von der Anzahl verschiedener Aufgabengrößen ab und ist nur für kleines $d$
+klein - im Vergleich zur $\mathrm{OPT}+1$-Garantie von \textcite{jansen_solisoba2010} ist das
+die schwächere Aussage, erkauft mit einem erheblich einfacheren Verfahren.
+Wie oft die Schranke tatsächlich erreicht wird und ob der Rundungsverlust in der Praxis überhaupt
+auftritt, ist eine empirische Frage.
+
+\subsection{Implementierung}
+\label{sub:gg-implementierung}
+
+Die Implementierung liegt in \texttt{binpacking/gilmore\_gomory\_lp.py}.
+Die Aufgabenliste wird zu $(p, u)$ aggregiert, $\mathcal{K}(\Gamma, C)$ per Tiefensuche mit
+Kapazitätsschnitt aufgezählt - es werden also nur zulässige Vektoren erzeugt, statt die volle
+Box aufzuspannen und nachträglich zu filtern - und das LP mit Gurobi gelöst.
+
+Zwei Details sind für die Korrektheit wesentlich.
+Erstens muss der Löser eine Ecke liefern.
+Die Schranke $|F| \le d$ aus Lemma~\ref{lem:gg-ecke} gilt nur dort: Sind $x$ und $x'$ zwei
+verschiedene optimale Ecken, so ist $\tfrac{1}{2}(x + x')$ ebenfalls optimal, aber keine Ecke und
+kann bis zu $2d$ positive Einträge haben.
+Simplexverfahren enden konstruktionsbedingt in einer Ecke \cite[Anh.~A]{williamson_shmoys2011}, ein Innere-Punkte-Verfahren ohne
+anschließenden Crossover dagegen möglicherweise im Inneren einer optimalen Seitenfläche; Gurobi
+wird deshalb auf die duale Simplex-Methode festgelegt.
+Zweitens werden die $x^\ast_a$ mit einer Toleranz auf- und abgerundet, weil der Löser Werte wie
+$2{,}9999999996$ statt $3$ zurückgibt.
+
+Zusätzlich lässt sich mit denselben Spalten statt \eqref{eq:gg-lp} direkt \eqref{eq:gg-ip} lösen.
+Das liefert $\mathrm{OPT}[\Gamma, C]$ exakt und damit eine Referenzlinie, gegen die sich sowohl
+der Rundungsverlust des LPs als auch der Abstand von MULTIFIT zum bestmöglichen Ergebnis bei
+jeder einzelnen getesteten Kapazität messen lässt.
+Auf Instanzen mit kleinem $d$ ist das praktikabel.
+
+Abschnitt~\ref{sec:hm} misst beides: den Rundungsverlust
+$\mathrm{GG}[\Gamma,C] - \lceil\mathrm{LP}[\Gamma,C]\rceil$ und die Häufigkeit des
+unentschiedenen Falls, dazu den Makespan gegen MULTIFIT+FFD und gegen die exakte
+Referenzlinie.

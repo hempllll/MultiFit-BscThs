@@ -1,0 +1,229 @@
+\chapter{Grundlagen}
+\label{chap:grundlagen}
+
+\section{Scheduling auf identischen Maschinen}
+\label{sec:problem}
+
+\begin{definition}[Instanz und Makespan]
+\label{def:instanz}
+Eine \emph{Instanz} $\Gamma$ besteht aus $n$ Aufgaben mit Größen $p_1, \ldots, p_n > 0$.
+Eine \emph{Zuordnung} von $\Gamma$ auf $m$ Maschinen ist ein Tupel $P = (P_1, \ldots, P_m)$
+paarweise disjunkter Mengen mit
+\[
+  P_1 \uplus P_2 \uplus \cdots \uplus P_m \;=\; \{1, \ldots, n\} .
+\]
+Die \emph{Last} einer Maschine $i$ ist $l_i = \sum_{j \in P_i} p_j$, der \emph{Makespan} der
+Zuordnung ist $C_{\max}(P) = \max_{1 \le i \le m} l_i$.
+Der kleinste Makespan einer Zuordnung von $\Gamma$ auf $m$ Maschinen wird mit
+$C^{*}_{\max}(\Gamma, m)$ bezeichnet.
+\end{definition}
+
+Zu einer Eingabe des Scheduling-Problems gehören damit stets beide Angaben: die Aufgabenliste
+$\Gamma$ und die Maschinenzahl $m$.
+Sie werden hier getrennt geführt und nicht zu einem Objekt zusammengefasst, weil dieselbe
+Aufgabenliste in Abschnitt~\ref{sec:binpacking} noch einmal auftritt - dort als
+Bin-Packing-Instanz, zu der keine Maschinenzahl gehört.
+Jede Aussage nennt die Maschinenzahl deshalb ausdrücklich, sobald sie gebraucht wird.
+
+In der Drei-Feld-Notation $\alpha \mid \beta \mid \gamma$ von \textcite{graham1979} heißt dieses
+Problem $P\,\|\,C_{\max}$: Das Feld $\alpha = P$ steht für identische parallele Maschinen, das
+leere Feld $\beta$ dafür, dass an die Aufgaben keine weiteren Einschränkungen gestellt werden, und
+$\gamma = C_{\max}$ für den Makespan als Zielgröße.
+Das $P$ dieser Notation bezeichnet die Maschinenumgebung und ist von der Zuordnung $P$ aus
+Definition~\ref{def:instanz} zu unterscheiden.
+Die Aufgaben werden dabei weder unterbrochen noch auf mehrere Maschinen aufgeteilt.
+
+Das zugehörige Entscheidungsproblem - gibt es zu einer gegebenen Schranke $T > 0$ eine Zuordnung
+mit Makespan höchstens $T$? - ist NP-vollständig \cite{garey_johnson1979}.
+Sofern $\mathrm{P} \ne \mathrm{NP}$ gilt, berechnet daher kein Algorithmus mit polynomieller
+Laufzeit den Wert $C^{*}_{\max}(\Gamma, m)$.
+Bekannt sind aber die beiden folgenden Schranken, auf die sich die Kapitel~\ref{kap:alternative}
+und~\ref{chap:evaluation} wiederholt stützen.
+Dabei bezeichnet $p_{\max} := \max_j p_j$ durchgehend die größte Aufgabengröße.
+
+\begin{lemma}[Untere Schranken]
+\label{lem:untere-schranken}
+Für jede Instanz $\Gamma$ und jede Maschinenzahl $m \ge 1$ gilt
+\[
+  C^{*}_{\max}(\Gamma, m) \;\ge\; \max\Bigl( \tfrac{1}{m}\textstyle\sum_{j} p_j,\; p_{\max} \Bigr).
+\]
+\end{lemma}
+
+\begin{proof}
+Jede Zuordnung verteilt die Gesamtlast $\sum_j p_j$ auf $m$ Maschinen, sodass mindestens eine
+Maschine eine Last von mindestens $\frac{1}{m}\sum_j p_j$ trägt.
+Ferner liegt die größte Aufgabe in genau einem $P_i$, dessen Last $l_i$ damit mindestens
+$p_{\max}$ beträgt.
+Beides gilt für jede Zuordnung, insbesondere für eine mit minimalem Makespan.
+\end{proof}
+
+\begin{definition}[Approximationsgüte]
+\label{def:guete}
+Sei $A$ ein Algorithmus, der zu einer Instanz $\Gamma$ und einer Maschinenzahl $m$ eine Zuordnung
+berechnet, und sei $C^{A}_{\max}(\Gamma, m)$ deren Makespan.
+Die \emph{Güte} von $A$ auf $m$ Maschinen ist
+\[
+  R_m(A) \;=\; \sup\Bigl\{\, C^{A}_{\max}(\Gamma, m) \,/\, C^{*}_{\max}(\Gamma, m)
+  \;\Bigm|\; \Gamma \text{ Instanz} \,\Bigr\}.
+\]
+\end{definition}
+
+Steht die Maschinenzahl im Kontext fest, so wird das zweite Argument weggelassen und kurz
+$C^{*}_{\max}(\Gamma)$ beziehungsweise $C^{A}_{\max}(\Gamma)$ geschrieben.
+
+\section{Bin Packing und FFD}
+\label{sec:binpacking}
+
+\begin{definition}[Bin Packing]
+\label{def:binpacking}
+Zu einer Instanz $\Gamma$ und einer Kapazität $C > 0$ fragt das Bin-Packing-Problem nach der
+kleinsten Anzahl von Bins der Kapazität $C$, auf die sich die Aufgaben so verteilen lassen, dass
+kein Bin eine Last über $C$ trägt.
+Diese Anzahl wird mit $\mathrm{OPT}[\Gamma, C]$ bezeichnet.
+\end{definition}
+
+Bin Packing kommt ohne Maschinenzahl aus: Gesucht ist die Anzahl der Bins, nicht eine Verteilung
+auf eine vorgegebene Anzahl von Maschinen.
+Beide Probleme arbeiten deshalb auf derselben Instanz $\Gamma$; über die Maschinenzahl sind sie
+zueinander dual.
+
+\begin{lemma}[Dualität]
+\label{lem:dualitaet}
+Sei $\Gamma$ eine Instanz, $m \ge 1$ eine Maschinenzahl und $C, C' > 0$ Kapazitäten.
+Dann gilt $C^{*}_{\max}(\Gamma, m) \le C$ genau dann, wenn $\mathrm{OPT}[\Gamma, C] \le m$.
+Ferner ist $C \mapsto \mathrm{OPT}[\Gamma, C]$ monoton fallend, das heißt aus $C \le C'$ folgt
+$\mathrm{OPT}[\Gamma, C'] \le \mathrm{OPT}[\Gamma, C]$.
+\end{lemma}
+
+\begin{proof}
+Eine Zuordnung mit Makespan höchstens $C$ verteilt die Aufgaben auf $m$ Mengen mit Last jeweils
+höchstens $C$, ist also eine Packung in höchstens $m$ Bins der Kapazität $C$; leere Maschinen
+entsprechen ungenutzten Bins.
+Umgekehrt liefert eine Packung in höchstens $m$ solche Bins eine Zuordnung auf $m$ Maschinen mit
+Makespan höchstens $C$.
+Die Monotonie folgt, da jede Packung mit Kapazität $C$ auch für jede Kapazität $C' \ge C$ zulässig
+ist.
+\end{proof}
+
+\emph{First Fit} legt jede Aufgabe in einer gegebenen Reihenfolge in den ersten Bin, in den sie
+passt, und eröffnet einen neuen Bin, falls keiner passt.
+\emph{First Fit Decreasing} (FFD) wendet First Fit auf die absteigend sortierte
+Aufgabenliste an.
+Mit $\mathrm{FFD}[\Gamma, C]$ wird die Anzahl der dabei erzeugten Bins bezeichnet.
+Es gilt
+\begin{equation}
+  \mathrm{FFD}[\Gamma, C] \;\le\; \tfrac{11}{9}\,\mathrm{OPT}[\Gamma, C] + \tfrac{6}{9},
+  \label{eq:ffd-guete}
+\end{equation}
+und diese Schranke ist scharf \cite{dosa2007}.
+
+\section{MULTIFIT}
+\label{sec:multifit}
+
+MULTIFIT \cite{coffman1978} löst $P\,\|\,C_{\max}$ nicht direkt, sondern führt eine Binärsuche über
+die Kapazität $C$ aus und ruft in jeder Iteration FFD auf.
+Ausgehend von
+\begin{equation}
+  c_{\mathrm{low}}^{(0)} = \max\Bigl( \tfrac{1}{m}\textstyle\sum_j p_j,\; p_{\max} \Bigr),
+  \qquad
+  c_{\mathrm{high}}^{(0)} = \tfrac{1}{m}\textstyle\sum_j p_j + p_{\max}
+  \label{eq:startintervall}
+\end{equation}
+wird $k$-mal die Intervallmitte $C = \frac{1}{2}(c_{\mathrm{low}} + c_{\mathrm{high}})$ getestet:
+Gilt $\mathrm{FFD}[\Gamma, C] \le m$, so wird $c_{\mathrm{high}} := C$ gesetzt und die erzeugte
+Packung gespeichert, andernfalls $c_{\mathrm{low}} := C$.
+Zurückgegeben wird die zuletzt gespeicherte Packung; ihr Makespan wird mit
+$C^{\mathrm{MF}}_{\max}(\Gamma)$ bezeichnet, die Variante mit $k$ Halbierungsschritten mit
+$\mathrm{MF}(k)$.
+Ein Aufruf mit $c_{\mathrm{high}}^{(0)}$ vor der Schleife stellt sicher, dass stets eine
+gespeicherte Packung vorliegt; er ist der Rückfall für den Fall, dass alle $k$ Tests scheitern,
+und lässt sich ebenso ans Ende verschieben.
+
+Dass beide Grenzen aus \eqref{eq:startintervall} zulässig gewählt sind, hält das folgende Lemma
+fest: Die untere Grenze überschreitet den gesuchten Wert nicht, und an der oberen gelingt der
+Test.
+
+\begin{lemma}[Startintervall]
+\label{lem:startintervall}
+Für jede Instanz $\Gamma$ und jede Maschinenzahl $m \ge 1$ gilt
+\begin{enumerate}[label=(\alph*), nosep]
+  \item $c_{\mathrm{low}}^{(0)} \le C^{*}_{\max}(\Gamma, m)$,
+  \item $\mathrm{FFD}[\Gamma, C] \le m$ für jedes $C \ge c_{\mathrm{high}}^{(0)}$ und
+  \item $C^{*}_{\max}(\Gamma, m) \le c_{\mathrm{high}}^{(0)}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Aussage~(a) ist Lemma~\ref{lem:untere-schranken}.
+Für~(b) sei angenommen, FFD eröffne bei Kapazität $C$ einen $(m+1)$-ten Bin, und zwar für die
+Aufgabe $p_j$.
+Zu diesem Zeitpunkt existieren genau $m$ Bins mit Lasten $l_1, \ldots, l_m$, und $p_j$ passt in
+keinen davon, also $l_i + p_j > C$ für alle $i$ und damit $\sum_{i=1}^{m} l_i > m\,(C - p_j)$.
+Da $p_j$ noch nicht platziert ist, gilt zugleich
+$\sum_{i=1}^{m} l_i \le \sum_{t \ne j} p_t$.
+Beides zusammen ergibt
+\[
+  C \;<\; \tfrac{1}{m}\textstyle\sum_{t} p_t + \tfrac{m-1}{m}\,p_j
+  \;\le\; \tfrac{1}{m}\textstyle\sum_{t} p_t + p_{\max}
+  \;=\; c_{\mathrm{high}}^{(0)} .
+\]
+Für $C \ge c_{\mathrm{high}}^{(0)}$ ist das ausgeschlossen, es entsteht also kein $(m+1)$-ter Bin.
+Aussage~(c) folgt aus~(b): Bei Kapazität $c_{\mathrm{high}}^{(0)}$ erzeugt FFD höchstens $m$ Bins,
+also ist $\mathrm{OPT}[\Gamma, c_{\mathrm{high}}^{(0)}] \le m$ und damit
+$C^{*}_{\max}(\Gamma, m) \le c_{\mathrm{high}}^{(0)}$ nach Lemma~\ref{lem:dualitaet}.
+\end{proof}
+
+Die Güte von MULTIFIT wird über den folgenden Wert ausgedrückt, der die Tiefe der Binärsuche
+ausklammert und allein das Verhältnis von FFD zum Optimum erfasst.
+
+\begin{definition}[Grenzverhältnis $r_m$]
+\label{def:rm}
+Eine Instanz $\Gamma$ heißt $(p/q)$-\emph{Gegenbeispiel} für $m$ Maschinen, wenn
+$\mathrm{FFD}[\Gamma, p] > m \ge \mathrm{OPT}[\Gamma, q]$ gilt.
+Es sei
+\[
+  r_m \;=\; \sup\bigl\{\, p/q \;\bigm|\; \text{es gibt ein } (p/q)\text{-Gegenbeispiel für }
+  m \text{ Maschinen} \,\bigr\}.
+\]
+\end{definition}
+
+Kapitel~\ref{chap:performanz} beweist die Schranke $r_m \le 5/4$, ordnet die schärfere Schranke
+$r_m \le 13/11$ in die Entwicklung der bekannten Ergebnisse ein und erläutert die Beweisidee von
+\textcite{cao1995}; dieser Beweis selbst wird dort nicht in voller Länge geführt.
+Ferner wird gezeigt, dass $13/11$ für $m \ge 13$ nicht verbessert werden kann.
+Ebenfalls dort behandelt wird, wie aus $r_m$ die Güte $R_m(\mathrm{MF}(k)) \le r_m + 2^{-k}$
+folgt; der additive Term geht auf die endliche Tiefe der Binärsuche zurück.
+
+Für die Binärsuche ist die folgende Konsequenz von Definition~\ref{def:rm} entscheidend:
+\begin{equation}
+  C > r_m \cdot C^{*}_{\max}(\Gamma, m) \;\;\Longrightarrow\;\; \mathrm{FFD}[\Gamma, C] \le m.
+  \label{eq:ffd-akzeptiert}
+\end{equation}
+Zum Beweis sei $q := C^{*}_{\max}(\Gamma, m)$ und $C > r_m \, q$.
+Nach Lemma~\ref{lem:dualitaet} gilt $\mathrm{OPT}[\Gamma, q] \le m$, denn $q$ ist der optimale
+Makespan.
+Wäre nun $\mathrm{FFD}[\Gamma, C] > m$, so erfüllte $\Gamma$ beide Bedingungen aus
+Definition~\ref{def:rm} und wäre ein $(C/q)$-Gegenbeispiel für $m$ Maschinen.
+Da $r_m$ das Supremum aller Quotienten solcher Gegenbeispiele ist, folgte $C/q \le r_m$ -
+im Widerspruch zu $C > r_m\, q$.
+Also gilt $\mathrm{FFD}[\Gamma, C] \le m$.
+
+MULTIFIT akzeptiert damit jede Kapazität oberhalb von $r_m \cdot C^{*}_{\max}(\Gamma, m)$ und kann
+seine obere Intervallgrenze bis dorthin absenken.
+Das ist die Eigenschaft, auf der die Schranke aus Kapitel~\ref{chap:performanz} beruht - und
+die eine andere Subroutine an Stelle von FFD ebenfalls erfüllen muss, wenn dieselbe Schlussweise
+greifen soll.
+
+\begin{bemerkung}[Nicht-Monotonie von FFD]
+\label{bem:nicht-monoton}
+Die Binärsuche sucht keine Schwelle, denn $C \mapsto \mathrm{FFD}[\Gamma, C]$ fällt nicht monoton.
+Für $\Gamma = (40, 39, 38, 36, 23, 22, 20, 19, 18, 15, 13, 13, 5)$ und $m = 4$ etwa gilt
+$\mathrm{FFD}[\Gamma, 76] = 4$, aber $\mathrm{FFD}[\Gamma, 77] = 5$.
+Bei $C = 76$ ist $39 + 38 = 77 > 76$; die Aufgabe~38 eröffnet daher einen dritten Bin, und es
+entstehen die Lasten $(76, 75, 75, 75)$.
+Bei $C = 77$ passen 39 und 38 gemeinsam in den zweiten Bin, der damit voll ist; am Ende bleibt eine
+13er-Aufgabe allein übrig, und es entstehen die Lasten $(76, 77, 70, 65, 13)$.
+Eine größere Kapazität kann also mehr Bins erfordern.
+Weshalb die Binärsuche die Schranke aus Kapitel~\ref{chap:performanz} dennoch einhält, wird
+dort ausgearbeitet.
+\end{bemerkung}

@@ -1,0 +1,99 @@
+\documentclass[ngerman]{scrreprt}
+
+\usepackage[utf8]{inputenc}
+% T1 ist noetig, damit Woerter mit Umlauten und ss getrennt werden.
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{hyperref}
+
+\usepackage[backend=biber,style=alphabetic]{biblatex}
+\usepackage{csquotes}
+% xurl bricht URLs an beliebiger Stelle -- ohne das laeuft der
+% Williamson-Shmoys-Eintrag im Literaturverzeichnis 40,7 pt in den Rand.
+\usepackage{xurl}
+
+% Ein Titel mit langer, nicht umbrechbarer Formel (yue_kellerer_yu1988) erzwingt
+% sonst ein Overfull \hbox; emergencystretch greift nur in genau solchen Zeilen.
+\AtBeginBibliography{\emergencystretch=2em}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+% Gleitobjekte duerfen keine \section-Grenze ueberschreiten; ohne diese Sperre
+% wandern die Abbildungen und Tabellen aus Kapitel 5 in den jeweils folgenden
+% Abschnitt. Kapitel 5 gliedert seine Versuchsreihen in Unterabschnitte, deshalb
+% liegt dieselbe Sperre zusaetzlich vor jedem \subsection.
+\usepackage[section]{placeins}
+\let\ORGsubsection\subsection
+\renewcommand{\subsection}{\FloatBarrier\ORGsubsection}
+\usetikzlibrary{positioning,arrows.meta,fit}
+
+% Mehr Gleitobjekte pro Seite zulassen, damit die Sperren oben keine
+% halbleeren Seiten erzwingen.
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.7}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{3}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{4}
+
+\usepackage{amsmath, amsfonts, amssymb, amsthm, cancel}
+\usepackage{enumitem}
+
+% Mit \def\OhneTodos{} von aussen (siehe unten) werden \todo und \listoftodos
+% zu No-Ops -- fuer eine Abgabefassung ohne die offenen Punkte:
+%   latexmk -jobname=main_ohne_todos -usepretex='\def\OhneTodos{}' main.tex
+\ifdefined\OhneTodos
+  \usepackage[disable]{todonotes}
+\else
+  \usepackage{todonotes}
+\fi
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{korollar}[theorem]{Korollar}
+
+\theoremstyle{remark}
+\newtheoremstyle{myremark}%
+  {\topsep}{\topsep}%
+  {\normalfont}%
+  {}%
+  {\itshape}%
+  {.}%
+  {.5em}%
+  {}%
+\theoremstyle{myremark}
+\newtheorem{bemerkung}[theorem]{Bemerkung}
+
+\addbibresource{refs.bib}
+
+% Kennzahlen der empirischen Auswertung; erzeugt von
+% Implementation/Empirical_Tests/summary_tables.py
+\input{tables/kennzahlen}
+\input{tables/kennzahlen_hm}
+
+\title{Analyse und Optimierung von MULTIFIT Algorithmen}
+\author{Fridjoff Hempel}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\listoftodos
+
+\include{chapters/01_einleitung}
+\include{chapters/02_grundlagen}
+\include{chapters/03_performanzanalyse}
+\include{chapters/04_alternative_subroutinen}
+\include{chapters/05_evaluation}
+\include{chapters/06_fazit}
+
+\printbibliography
+
+\input{chapters/eigenstaendigkeitserklaerung}
+
+\end{document}

@@ -1,0 +1,506 @@
+\chapter{Performanzanalyse von MULTIFIT}
+\label{chap:performanz}
+
+\section{Einordnung und Chronologie}
+\label{sec:chronologie}
+
+\textcite{coffman1978} führen MULTIFIT ein und zeigen zweierlei: dass sich die Güte des
+Verfahrens auf das Grenzverhältnis zurückführen lässt, $R_m(\mathrm{MF}(k)) \le r_m + 2^{-k}$,
+und dass $r_m \le 1{,}22$ gilt.
+
+\textcite{friesen1984} verschärft die zweite Aussage auf $r_m \le 6/5$ und gibt zugleich eine
+Instanz für $m = 13$ an, die das Verhältnis $13/11$ erzwingt.
+Damit ist $13/11$ als untere Schranke fixiert und der verbleibende Spielraum auf das Intervall
+zwischen $13/11 \approx 1{,}182$ und $6/5 = 1{,}2$ eingeengt; die Instanz wird in
+Abschnitt~\ref{sec:untere-schranke} behandelt.
+Für die daraus folgende Güteschranke $R_m(\mathrm{MF}(k)) \le 6/5 + 2^{-k}$ geben
+\textcite{yue_kellerer_yu1988} einen einfachen Beweis an.
+
+Geschlossen wird der Spielraum von \textcite{yue1990} mit dem Nachweis $r_m \le 13/11$.
+Nach Darstellung von \textcite{cao1995} bleiben in diesem Beweis Fälle unbehandelt; Cao gibt
+daher einen eigenen, vollständigen Beweis derselben Schranke - die Arbeit, die dieser
+Bachelorarbeit als primäre Quelle dient.
+
+Alle genannten Werte sind obere Schranken an $r_m$; scharf ist von ihnen nur der letzte, und
+zwar für jede Maschinenzahl $m \ge 13$.
+Die Instanz von \textcite{friesen1984} erreicht ihn für $m = 13$ und lässt sich durch Auffüllen
+auf größere Maschinenzahlen übertragen - beides in Abschnitt~\ref{sec:untere-schranke}.
+Für $m < 13$ ist damit nur die obere Schranke $r_m \le 13/11$ aus \cite{cao1995} gesichert;
+über den genauen Wert trifft diese Arbeit dort keine Aussage.
+Zu beachten ist außerdem, dass $r_m$ nach Definition~\ref{def:rm} kein Verhältnis von
+Makespans ist, sondern das Supremum der Quotienten $p/q$ über alle Gegenbeispiele; wie daraus
+eine Aussage über den von MULTIFIT erzeugten Makespan wird, zeigt
+Abschnitt~\ref{sec:guete-multifit}.
+
+\section{Minimale Gegenbeispiele}
+\label{sec:minimale-gegenbeispiele}
+
+Die Herleitung der Schranke $r_m \le 5/4$ in den Abschnitten~\ref{sec:minimale-gegenbeispiele}
+bis~\ref{sec:schranke54} geht auf \textcite{coffman1978} zurück.
+Von dort stammen die Beweistechnik - Annahme eines kleinstmöglichen Gegenbeispiels und
+Widerspruch aus dessen Struktur - sowie die Struktureigenschaften, welche die folgenden Lemmata
+festhalten; die Arbeit führt sie zu der schärferen Schranke $r_m \le 1{,}22$ fort, deren
+zusätzliche Argumente hier nicht dargestellt werden.
+\textcite{cao1995} übernimmt diese Grundlage ausdrücklich (\enquote{We follow the definitions and
+notations in this paper}, \cite[S.~79]{cao1995}) und setzt etwa die Dominanz eines Bins der
+optimalen Packung durch einen FFD-Bin \cite[S.~88]{cao1995} sowie die untere Schranke $p - q$ für
+die kleinste Aufgabe \cite[S.~80]{cao1995} ohne Beweis voraus; weitere Lemmata führt er auf
+\textcite{yue1990} zurück.
+Formulierung und Ausführung der Beweise sind eigene Ausarbeitung.
+
+Im Folgenden seien $p > q > 0$ fest.
+Die Aufgaben einer Instanz $\Gamma$ seien absteigend nummeriert, also $p_1 \ge \cdots \ge p_n$;
+FFD bearbeitet sie dann in dieser Reihenfolge.
+Mit $|\Gamma| = n$ wird die Anzahl der Aufgaben bezeichnet und mit $\Gamma_J$ für
+$J \subseteq \{1, \ldots, n\}$ die Instanz aus den Aufgaben $(p_j)_{j \in J}$.
+
+\begin{definition}[Minimales Gegenbeispiel, nach \cite{coffman1978}]
+\label{def:minimales-gegenbeispiel}
+Ein $(p/q)$-Gegenbeispiel $\Gamma$ für $m$ Maschinen im Sinne von Definition~\ref{def:rm} heißt
+\emph{minimal}, wenn keine Instanz $\Gamma'$ mit $|\Gamma'| < |\Gamma|$ ein $(p/q)$-Gegenbeispiel
+für irgendeine Maschinenzahl $m'$ ist.
+\end{definition}
+
+Die Minimalität bezieht sich also auf die Aufgabenzahl und läuft über alle Maschinenzahlen
+zugleich.
+Da $|\Gamma|$ eine natürliche Zahl ist, existiert zu jedem $(p/q)$-Gegenbeispiel auch ein
+minimales.
+\textcite{cao1995} minimiert dagegen bei fester Maschinenzahl und fordert dafür zusätzlich
+$r_{m'} \le p/q$ für alle $m' < m$; die hier gewählte Fassung kommt ohne diese Bedingung aus.
+
+\begin{bemerkung}[Teilinstanzen]
+\label{bem:teilinstanz}
+Für jede Instanz $\Gamma$, jedes $J \subseteq \{1, \ldots, n\}$ und jede Kapazität $C > 0$ gilt
+$\mathrm{OPT}[\Gamma_J, C] \le \mathrm{OPT}[\Gamma, C]$.
+Streicht man aus einer Packung von $\Gamma$ alle Aufgaben außerhalb von $J$, so entsteht eine
+Packung von $\Gamma_J$ mit höchstens ebenso vielen Bins.
+\end{bemerkung}
+
+\begin{lemma}[Gestalt eines minimalen Gegenbeispiels, nach \cite{coffman1978}]
+\label{lem:gestalt}
+Sei $\Gamma$ ein minimales $(p/q)$-Gegen\-bei\-spiel für $m$ Maschinen. Dann gilt
+\begin{enumerate}[label=(\alph*), nosep]
+  \item $\mathrm{FFD}[\Gamma, p] = m+1$,
+  \item der $(m+1)$-te Bin enthält genau die Aufgabe $p_n$ und
+  \item $l_i + p_n > p$ für die Lasten $l_1, \ldots, l_m$ der übrigen Bins.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+FFD platziert die Aufgaben in der Reihenfolge $p_1, \ldots, p_n$, und die Platzierung von $p_j$
+hängt nur von $p_1, \ldots, p_j$ ab.
+Für $J = \{1, \ldots, j\}$ erzeugt FFD auf $\Gamma_J$ bei Kapazität $p$ daher dieselben
+Platzierungen wie auf $\Gamma$.
+Wegen $\mathrm{FFD}[\Gamma, p] > m$ existiert ein Index $j$, für den FFD einen $(m+1)$-ten Bin
+eröffnet; für $J = \{1, \ldots, j\}$ gilt dann $\mathrm{FFD}[\Gamma_J, p] = m+1 > m$.
+Nach Bemerkung~\ref{bem:teilinstanz} ist zudem
+$\mathrm{OPT}[\Gamma_J, q] \le \mathrm{OPT}[\Gamma, q] \le m$, also ist $\Gamma_J$ ein
+$(p/q)$-Gegenbeispiel für $m$ Maschinen.
+Die Minimalität von $\Gamma$ erzwingt $|\Gamma_J| = |\Gamma|$ und damit $j = n$.
+Da $p_n$ zuletzt platziert wird, folgen (a) und (b).
+Aussage~(c) gilt, weil FFD sonst $p_n$ in einen der ersten $m$ Bins gelegt hätte, statt einen
+neuen zu eröffnen.
+\end{proof}
+
+\begin{bemerkung}[Maschinenzahl]
+\label{bem:m-mindestens-zwei}
+In einem $(p/q)$-Gegenbeispiel für $m$ Maschinen gilt $m \ge 2$.
+Für $m = 1$ folgt nämlich aus $\mathrm{OPT}[\Gamma, q] \le 1$ zunächst $\sum_j p_j \le q$ und
+wegen $q < p$ dann $\mathrm{FFD}[\Gamma, p] = 1$, im Widerspruch zu
+$\mathrm{FFD}[\Gamma, p] > 1$.
+Da $p > q$ beliebig war, treten für $m = 1$ nur Gegenbeispiele mit $p \le q$ auf; es gilt also
+$r_1 \le 1$.
+\end{bemerkung}
+
+\section{Löschlemma}
+\label{sec:loeschlemma}
+
+Zu einer Instanz $\Gamma$ und einer Kapazität $C > 0$ bezeichne $B_1, \ldots, B_N \subseteq
+\{1, \ldots, n\}$ die von FFD erzeugten Bins, nummeriert in der Reihenfolge ihrer Eröffnung.
+Für $j \in \{1, \ldots, n\}$ sei $B_i^{<j} = B_i \cap \{1, \ldots, j-1\}$ der Inhalt des $i$-ten
+Bins unmittelbar vor der Platzierung von $p_j$ und $l_i^{<j} = \sum_{t \in B_i^{<j}} p_t$ dessen
+Last.
+Da die Bins in aufsteigender Nummerierung eröffnet werden, sind zu diesem Zeitpunkt genau die
+Bins $B_1, \ldots, B_{t(j)}$ mit $t(j) = \max\{\, i : B_i^{<j} \ne \emptyset \,\}$ vorhanden.
+FFD legt $p_j$ in den Bin mit dem kleinsten Index $i \le t(j)$, für den $l_i^{<j} + p_j \le C$
+gilt; existiert kein solcher, so wird $B_{t(j)+1}$ eröffnet.
+
+\begin{lemma}[Löschlemma, nach \cite{coffman1978}]
+\label{lem:loesch}
+Sei $\Gamma$ eine Instanz, $C > 0$ eine Kapazität, seien $B_1, \ldots, B_N$ die von FFD bei
+Kapazität $C$ erzeugten Bins und sei $k \in \{1, \ldots, N\}$.
+Für $J = \{1, \ldots, n\} \setminus B_k$ erzeugt FFD auf $\Gamma_J$ bei Kapazität $C$ genau die
+Bins $B_i$ mit $i \ne k$, eröffnet in aufsteigender Nummerierung.
+Insbesondere gilt $\mathrm{FFD}[\Gamma_J, C] = \mathrm{FFD}[\Gamma, C] - 1$.
+\end{lemma}
+
+\begin{proof}
+Induktion über die Aufgaben aus $J$ in aufsteigender Nummerierung.
+Behauptet wird: Unmittelbar vor der Platzierung von $p_j$ mit $j \in J$ sind im Lauf auf
+$\Gamma_J$ genau die nichtleeren Mengen $B_i^{<j}$ mit $i \ne k$ als Bins vorhanden, und zwar
+nach aufsteigendem Index~$i$ geordnet.
+
+Sei $j_0 = \min J$. Alle Aufgaben mit kleinerem Index liegen in $B_k$, also ist $B_i^{<j_0} =
+\emptyset$ für $i \ne k$, und im Lauf auf $\Gamma_J$ ist noch nichts platziert.
+
+Sei die Behauptung für $j \in J$ erfüllt und $i^{*}$ der Index des Bins, in den $p_j$ im Lauf auf
+$\Gamma$ gelegt wird; wegen $j \notin B_k$ ist $i^{*} \ne k$.
+Nach Induktionsvoraussetzung stehen im Lauf auf $\Gamma_J$ dieselben Bins mit denselben Lasten
+zur Verfügung, nur ohne $B_k$.
+Ist $i^{*} \le t(j)$, so gilt $l_i^{<j} + p_j > C$ für alle $i < i^{*}$, insbesondere für alle
+diese $i$ mit $i \ne k$; First Fit wählt also auch dort $B_{i^{*}}$.
+Andernfalls passt $p_j$ in keinen vorhandenen Bin, und beide Läufe eröffnen einen neuen.
+Die Aufgaben zwischen $j$ und der nächsten Aufgabe aus $J$ liegen sämtlich in $B_k$ und ändern im
+Lauf auf $\Gamma$ nur dessen Inhalt; damit gilt die Behauptung auch für die nächste Aufgabe aus
+$J$.
+
+Beide Läufe stimmen somit auf allen Aufgaben aus $J$ überein.
+Jeder eröffnete Bin ist nichtleer, also erzeugt FFD auf $\Gamma_J$ genau die $N-1$ Bins $B_i$ mit
+$i \ne k$.
+\end{proof}
+
+\section{Dominanzlemma}
+\label{sec:dominanz}
+
+Ist $\Gamma$ ein $(p/q)$-Gegenbeispiel für $m$ Maschinen, so gilt $\mathrm{OPT}[\Gamma, q] \le m$;
+es gibt also eine Zerlegung $\{1, \ldots, n\} = Q_1 \uplus \cdots \uplus Q_m$ mit
+$\sum_{j \in Q_l} p_j \le q$ für alle $l$, wobei leere Teile zugelassen sind.
+Eine solche Zerlegung heißt im Folgenden \emph{$q$-Packung} von $\Gamma$.
+
+\begin{definition}[Dominanz, nach \cite{coffman1978}]
+\label{def:dominanz}
+Seien $A, B \subseteq \{1, \ldots, n\}$.
+Dann wird $A$ von $B$ \emph{dominiert}, wenn es eine injektive Abbildung
+$\varphi\colon A \to B$ mit $p_{\varphi(j)} \ge p_j$ für alle $j \in A$ gibt.
+\end{definition}
+
+\begin{lemma}[Dominanzlemma, nach \cite{coffman1978}]
+\label{lem:dominanz}
+Sei $\Gamma$ ein minimales $(p/q)$-Gegen\-bei\-spiel für $m$ Maschinen, seien
+$B_1, \ldots, B_{m+1}$ die von FFD bei Kapazität $p$ erzeugten Bins und sei
+$Q_1, \ldots, Q_m$ eine $q$-Packung von $\Gamma$.
+Dann wird kein $Q_i$ von einem $B_k$ dominiert.
+\end{lemma}
+
+\begin{proof}
+Angenommen, $\varphi\colon Q_i \to B_k$ ist injektiv mit $p_{\varphi(j)} \ge p_j$ für alle
+$j \in Q_i$.
+
+Zunächst darf $\varphi(x) = x$ für alle $x \in Q_i \cap B_k$ angenommen werden.
+Ist nämlich $x \in Q_i \cap B_k$ mit $\varphi(x) \ne x$ und liegt $x$ nicht im Bild von
+$\varphi$, so ersetze man $\varphi(x)$ durch $x$.
+Andernfalls ist $x = \varphi(y)$ für genau ein $y \in Q_i$ mit $y \ne x$; man ersetze dann
+$\varphi(y)$ durch $\varphi(x)$ und $\varphi(x)$ durch $x$.
+In beiden Fällen bleibt $\varphi$ injektiv mit Werten in $B_k$, und wegen
+$p_{\varphi(x)} \ge p_x = p_{\varphi(y)} \ge p_y$ bleibt die Größenbedingung erfüllt.
+Da die Anzahl der $x \in Q_i \cap B_k$ mit $\varphi(x) = x$ dabei wächst, ist die Annahme nach
+endlich vielen Schritten erfüllt.
+
+Damit gilt $\varphi(j) \notin Q_i$ für jedes $j \in Q_i \setminus B_k$: Wäre
+$\varphi(j) \in Q_i$, so läge $\varphi(j)$ in $Q_i \cap B_k$, also
+$\varphi(\varphi(j)) = \varphi(j)$, und die Injektivität ergäbe $j = \varphi(j) \in B_k$ im
+Widerspruch zu $j \notin B_k$.
+
+Sei nun $J = \{1, \ldots, n\} \setminus B_k$ und
+\[
+  Q'_l \;=\; (Q_l \setminus B_k) \;\cup\; \{\, j \in Q_i \setminus B_k : \varphi(j) \in Q_l \,\}
+  \qquad (l \ne i).
+\]
+Diese $m-1$ Mengen sind paarweise disjunkt und überdecken $J$: Jedes $j \in J$ liegt entweder in
+einem $Q_l$ mit $l \ne i$ oder in $Q_i \setminus B_k$, und im zweiten Fall ist $\varphi(j)$ nach
+dem Vorigen in einem $Q_l$ mit $l \ne i$ enthalten.
+Da $j \mapsto \varphi(j)$ die zweite Menge injektiv nach $Q_l \cap B_k$ abbildet und dabei die
+Größen nicht verkleinert, gilt
+\[
+  \sum_{j \in Q'_l} p_j \;\le\; \sum_{j \in Q_l \setminus B_k} p_j
+  \;+\; \sum_{x \in Q_l \cap B_k} p_x \;=\; \sum_{j \in Q_l} p_j \;\le\; q ,
+\]
+also $\mathrm{OPT}[\Gamma_J, q] \le m-1$.
+
+Nach dem Löschlemma~\ref{lem:loesch} und Lemma~\ref{lem:gestalt}(a) ist zugleich
+$\mathrm{FFD}[\Gamma_J, p] = \mathrm{FFD}[\Gamma, p] - 1 = m > m-1$, und wegen
+Bemerkung~\ref{bem:m-mindestens-zwei} ist $m - 1 \ge 1$.
+Also ist $\Gamma_J$ ein $(p/q)$-Gegenbeispiel für $m-1$ Maschinen.
+Da $B_k$ nicht leer ist, gilt $|\Gamma_J| < |\Gamma|$ - im Widerspruch zur Minimalität von
+$\Gamma$.
+\end{proof}
+
+In dieser Form - ein Bin der $q$-Packung gegen einen FFD-Bin - benutzt \textcite{cao1995}
+die Aussage ebenfalls \cite[S.~88]{cao1995}.
+
+\section{Aufgaben je Bin der \texorpdfstring{$q$}{q}-Packung}
+\label{sec:drei-aufgaben}
+
+\begin{lemma}[Mindestens drei Aufgaben je Bin, nach \cite{coffman1978}]
+\label{lem:drei-aufgaben}
+Sei $\Gamma$ ein minimales $(p/q)$-Gegen\-bei\-spiel für $m$ Maschinen und sei
+$Q_1, \ldots, Q_m$ eine $q$-Packung von $\Gamma$.
+Dann gilt $|Q_i| \ge 3$ für alle $i$.
+\end{lemma}
+
+\begin{proof}
+Angenommen, es ist $|Q_i| \le 2$ für ein $i$.
+Es wird gezeigt, dass $Q_i$ dann von einem der Bins $B_1, \ldots, B_{m+1}$ dominiert wird, im
+Widerspruch zu Lemma~\ref{lem:dominanz}.
+Benutzt wird dabei mehrfach, dass wegen der absteigenden Nummerierung $p_t \ge p_j$ für $t < j$
+gilt: Jede vor $p_j$ platzierte Aufgabe ist mindestens so groß wie $p_j$.
+
+Ist $Q_i = \emptyset$, so wird $Q_i$ von $B_1$ dominiert, denn die leere Abbildung erfüllt
+Definition~\ref{def:dominanz}.
+Ist $Q_i = \{x\}$, so wird $Q_i$ von demjenigen Bin dominiert, der $x$ enthält.
+
+Sei also $Q_i = \{x, y\}$ mit $x < y$, und seien $B_a$ und $B_b$ die Bins mit $x \in B_a$ und
+$y \in B_b$.
+Aus $x, y \in Q_i$ folgt $p_x + p_y \le q < p$.
+
+Im Fall $a = b$ wird $Q_i$ von $B_a$ durch die identische Abbildung dominiert.
+
+Im Fall $b > a$ war $B_a$ bei der Platzierung von $y$ bereits eröffnet, denn er enthält die
+zuvor platzierte Aufgabe $x$; da $y$ nicht dort abgelegt wurde, gilt $l_a^{<y} + p_y > p$.
+Wäre $B_a^{<y} = \{x\}$, so folgte $p_x + p_y > p$ im Widerspruch zu $p_x + p_y < p$.
+Also enthält $B_a^{<y}$ eine Aufgabe $z \ne x$, und wegen $z < y$ ist $p_z \ge p_y$.
+Die Abbildung $x \mapsto x$, $y \mapsto z$ zeigt, dass $Q_i$ von $B_a$ dominiert wird.
+
+Im Fall $b < a$ war $B_b$ bei der Platzierung von $x$ bereits eröffnet: Die Bins werden in
+aufsteigender Nummerierung eröffnet, und $B_a$ existiert zu diesem Zeitpunkt oder wird gerade
+von $x$ eröffnet.
+Also ist $B_b^{<x} \ne \emptyset$; für jede Aufgabe $z \in B_b^{<x}$ gilt $z < x$ und damit
+$p_z \ge p_x$, und wegen $y > x$ ist $z \ne y$.
+Die Abbildung $x \mapsto z$, $y \mapsto y$ zeigt, dass $Q_i$ von $B_b$ dominiert wird.
+\end{proof}
+
+\section{Größenschranken}
+\label{sec:groessenschranken}
+
+\begin{lemma}[Größenschranken, nach \cite{coffman1978}]
+\label{lem:groessenschranken}
+Sei $\Gamma$ ein minimales $(p/q)$-Gegen\-bei\-spiel für $m$ Maschinen und $s = p_n$ die kleinste
+Aufgabe. Dann gilt
+\begin{enumerate}[label=(\alph*), nosep]
+  \item $s > \frac{m}{m-1}\,(p-q)$ und
+  \item $p_j \le q - 2s$ für alle $j \in \{1, \ldots, n\}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+Zu (a): Nach Lemma~\ref{lem:gestalt} erzeugt FFD bei Kapazität $p$ genau $m+1$ Bins, der letzte
+enthält nur $p_n = s$, und für die Lasten der übrigen gilt $l_i + s > p$.
+Summation über $i = 1, \ldots, m$ ergibt
+\[
+  \sum_{j} p_j - s \;=\; \sum_{i=1}^{m} l_i \;>\; m\,(p - s).
+\]
+Andererseits ist $\sum_j p_j \le m\,q$, denn eine $q$-Packung verteilt alle Aufgaben auf $m$ Bins
+der Kapazität $q$.
+Zusammen folgt $m\,q - s > m\,p - m\,s$, also $(m-1)\,s > m\,(p-q)$; wegen $m \ge 2$
+(Bemerkung~\ref{bem:m-mindestens-zwei}) darf durch $m-1$ geteilt werden.
+
+Zu (b): Sei $Q_i$ der Bin einer $q$-Packung mit $j \in Q_i$.
+Nach Lemma~\ref{lem:drei-aufgaben} enthält $Q_i$ neben $j$ mindestens zwei weitere Aufgaben, deren
+Größen jeweils mindestens $s$ betragen.
+Aus $\sum_{t \in Q_i} p_t \le q$ folgt daher $p_j \le q - 2s$.
+\end{proof}
+
+\section{Die Schranke \texorpdfstring{$r_m \le 5/4$}{rm <= 5/4}}
+\label{sec:schranke54}
+
+\begin{theorem}[nach \cite{coffman1978}]
+\label{thm:schranke54}
+Für jede Maschinenzahl $m \ge 1$ gilt $r_m \le 5/4$.
+\end{theorem}
+
+\begin{proof}
+Es wird gezeigt, dass es zu $p > \frac{5}{4}\,q$ kein $(p/q)$-Gegenbeispiel gibt; nach
+Definition~\ref{def:rm} folgt daraus $r_m \le 5/4$ für jedes $m$.
+
+Angenommen, es gäbe eines.
+Dann gibt es auch ein minimales; sei $\Gamma$ ein minimales $(p/q)$-Gegen\-bei\-spiel für eine
+Maschinenzahl $m$, sei $s = p_n$ und sei $Q_1, \ldots, Q_m$ eine $q$-Packung von $\Gamma$.
+Aus Lemma~\ref{lem:groessenschranken}(a) und $\frac{m}{m-1} > 1$ folgt
+\[
+  s \;>\; p - q \;>\; \tfrac{1}{4}\,q ,
+\]
+denn $p > \frac{5}{4} q$ ist gleichbedeutend mit $p - q > \frac{1}{4} q$.
+Vier Aufgaben hätten damit eine Gesamtgröße von mehr als $q$, sodass jedes $Q_i$ höchstens drei
+Aufgaben enthält und nach Lemma~\ref{lem:drei-aufgaben} genau drei.
+Insbesondere ist $n = 3m$, und aus $\sum_{t \in Q_i} p_t \le q$ folgt $q \ge 3s$.
+
+Sei nun $i \in \{1, \ldots, m\}$ und angenommen, $B_i$ enthielte höchstens zwei Aufgaben.
+Nach Lemma~\ref{lem:groessenschranken}(b) wäre dann $l_i \le 2\,(q - 2s)$; wegen $q \ge 3s$ ist
+dieser Wert positiv.
+Aus $s > p - q$ und $5q < 4p$ ergibt sich
+\[
+  2q - 3s \;<\; 2q - 3\,(p-q) \;=\; 5q - 3p \;<\; 4p - 3p \;=\; p
+\]
+und damit $l_i \le 2q - 4s < p - s$ - im Widerspruch zu Lemma~\ref{lem:gestalt}(c), wonach
+$l_i > p - s$ gilt.
+
+Jeder der Bins $B_1, \ldots, B_m$ enthält also mindestens drei Aufgaben.
+Zusammen mit der Aufgabe $p_n$ im $(m+1)$-ten Bin (Lemma~\ref{lem:gestalt}(b)) folgt
+$n \ge 3m + 1$ im Widerspruch zu $n = 3m$.
+\end{proof}
+
+Die Schranke $5/4 = 1{,}25$ ist eine obere Schranke an $r_m$ und nicht scharf:
+\textcite{coffman1978} zeigen mit weiteren Argumenten $r_m \le 1{,}22$, und nach
+\textcite{cao1995} gilt $r_m \le 13/11$.
+Sie ist auch kein Worst-Case-Verhältnis von Makespans - welche Aussage über MULTIFIT aus einer
+Schranke an $r_m$ folgt, klärt der folgende Abschnitt.
+Was fehlt, um von $5/4$ auf $13/11$ zu kommen, sind Gewichtsfunktionen und eine Fallunterscheidung
+über die Größenverhältnisse; beides beschreibt Abschnitt~\ref{sec:beweisidee1311}.
+
+\section{Von \texorpdfstring{$r_m$}{rm} zur Güte von MULTIFIT}
+\label{sec:guete-multifit}
+
+Auch die folgende Schranke stammt aus \cite{coffman1978}; der Beweis ist eine eigene
+Ausarbeitung.
+
+\begin{bemerkung}[Untere Schranke an $r_m$]
+\label{bem:rm-mindestens-eins}
+Für jedes $m \ge 1$ gilt $r_m \ge 1$.
+Sei dazu $\Gamma$ die Instanz aus $m+1$ Aufgaben der Größe $1$ und $p \in [1, 2)$.
+Bei Kapazität $p$ passen keine zwei Aufgaben in denselben Bin, also ist
+$\mathrm{FFD}[\Gamma, p] = m+1 > m$, während $\mathrm{OPT}[\Gamma, 2] = \lceil (m+1)/2 \rceil
+\le m$ gilt.
+Damit ist $\Gamma$ ein $(p/2)$-Gegenbeispiel für $m$ Maschinen, und das Supremum über $p < 2$
+liefert $r_m \ge 1$.
+\end{bemerkung}
+
+\begin{theorem}[nach \cite{coffman1978}]
+\label{thm:guete}
+Für jede Maschinenzahl $m \ge 1$ und jedes $k \ge 0$ gilt
+$R_m(\mathrm{MF}(k)) \le r_m + 2^{-k}$.
+\end{theorem}
+
+\begin{proof}
+Sei $\Gamma$ eine Instanz.
+Im Verlauf der Binärsuche aus Abschnitt~\ref{sec:multifit} gelten durchgehend zwei Invarianten.
+
+Erstens ist $\mathrm{FFD}[\Gamma, c_{\mathrm{high}}] \le m$, und die gespeicherte Packung ist die
+von FFD bei Kapazität $c_{\mathrm{high}}$ erzeugte.
+Für den Startwert ist das Lemma~\ref{lem:startintervall}(b); $c_{\mathrm{high}}$ wird nur dann auf
+eine Kapazität $C$ gesetzt, wenn $\mathrm{FFD}[\Gamma, C] \le m$ gilt, und in diesem Fall wird
+zugleich die dort erzeugte Packung gespeichert.
+
+Zweitens ist $c_{\mathrm{low}} \le r_m \cdot C^{*}_{\max}(\Gamma)$.
+Für den Startwert folgt das aus Lemma~\ref{lem:startintervall}(a) zusammen mit
+Bemerkung~\ref{bem:rm-mindestens-eins}.
+Gesetzt wird $c_{\mathrm{low}} := C$ nur, wenn $\mathrm{FFD}[\Gamma, C] > m$ gilt; nach
+\eqref{eq:ffd-akzeptiert} ist dann $C \le r_m \cdot C^{*}_{\max}(\Gamma)$.
+
+Jeder Suchschritt ersetzt eine der beiden Grenzen durch die Intervallmitte, halbiert die
+Intervallbreite also genau. Nach $k$ Schritten gilt daher mit \eqref{eq:startintervall} und
+Lemma~\ref{lem:untere-schranken}
+\[
+  c_{\mathrm{high}} - c_{\mathrm{low}}
+  \;=\; 2^{-k}\bigl(c_{\mathrm{high}}^{(0)} - c_{\mathrm{low}}^{(0)}\bigr)
+  \;=\; 2^{-k} \min\Bigl( \tfrac{1}{m}\textstyle\sum_j p_j,\; p_{\max} \Bigr)
+  \;\le\; 2^{-k}\, C^{*}_{\max}(\Gamma).
+\]
+
+Jede getestete Kapazität ist mindestens $c_{\mathrm{low}}^{(0)} \ge p_{\max}$; jede Aufgabe passt
+also in einen leeren Bin, und die Lasten der erzeugten Packung überschreiten die Kapazität nicht.
+Die zurückgegebene Packung gehört nach der ersten Invariante zu $c_{\mathrm{high}}$, sodass
+$C^{\mathrm{MF}}_{\max}(\Gamma) \le c_{\mathrm{high}}$ ist. Zusammen ergibt sich
+\[
+  C^{\mathrm{MF}}_{\max}(\Gamma)
+  \;\le\; c_{\mathrm{low}} + \bigl(c_{\mathrm{high}} - c_{\mathrm{low}}\bigr)
+  \;\le\; \bigl(r_m + 2^{-k}\bigr) C^{*}_{\max}(\Gamma).
+\]
+Division durch $C^{*}_{\max}(\Gamma)$ und Übergang zum Supremum über alle Instanzen liefert die
+Behauptung.
+\end{proof}
+
+Mit Theorem~\ref{thm:schranke54} folgt daraus $R_m(\mathrm{MF}(k)) \le 5/4 + 2^{-k}$ und mit der
+Schranke von \textcite{cao1995} entsprechend $R_m(\mathrm{MF}(k)) \le 13/11 + 2^{-k}$.
+
+Der Beweis benutzt die Monotonie von FFD an keiner Stelle, sondern allein die einseitige
+Implikation~\eqref{eq:ffd-akzeptiert}.
+Damit ist das in Bemerkung~\ref{bem:nicht-monoton} offen gebliebene Beispiel aufgelöst.
+Für die dortige Instanz $\Gamma$ mit $m = 4$ ist $\sum_j p_j = 301$ und $p_{\max} = 40$, die Suche
+startet also bei $c_{\mathrm{low}}^{(0)} = 75{,}25$ und $c_{\mathrm{high}}^{(0)} = 115{,}25$.
+Die ersten drei Schritte akzeptieren $95{,}25$, $85{,}25$ und $80{,}25$; der vierte verwirft
+$C = 77{,}75$ wegen $\mathrm{FFD}[\Gamma, 77{,}75] = 5$ und schließt damit alle kleineren
+Kapazitäten aus - auch $C = 76$, wo FFD vier Bins mit den Lasten $(76, 75, 75, 75)$ erzeugt.
+Da die Aufgabengrößen ganzzahlig sind und $\lceil 301/4 \rceil = 76$ ist, gilt
+$C^{*}_{\max}(\Gamma) = 76$.
+Zurückgegeben wird für jedes $k \ge 6$ eine Packung mit Makespan $78$.
+Ein Widerspruch zu Theorem~\ref{thm:guete} entsteht daraus nicht: Verworfen werden kann eine
+Kapazität nach~\eqref{eq:ffd-akzeptiert} nur unterhalb von $r_4 \cdot C^{*}_{\max}(\Gamma)$, und
+dieser Wert beträgt nach \textcite{cao1995} höchstens $\frac{13}{11} \cdot 76 = 89{,}82$.
+Verloren geht nicht die Schranke, sondern das Optimum: Nach dem vierten Schritt kann die Suche
+nicht mehr unter $77{,}75$ gehen.
+Davon zu unterscheiden ist die Nicht-Monotonie des Makespans in $k$, die in
+Abschnitt~\ref{sec:k-sensitivitaet} behandelt wird.
+
+\section{Beweisidee der Schranke \texorpdfstring{$13/11$}{13/11}}
+\label{sec:beweisidee1311}
+
+Der Beweis von \textcite{cao1995} folgt demselben Schema: Angenommen wird ein minimales
+$(p/q)$-Gegenbeispiel, und der Widerspruch entsteht aus dessen Struktur.
+Zusätzlich gebraucht werden eine feinere Einteilung der FFD-Bins und Gewichtsfunktionen.
+
+\begin{definition}[$k$-Bin]
+\label{def:k-bin}
+Sei $i < N$ und $j = \min B_{i+1}$.
+Dann heißt $B_i$ ein \emph{$k$-Bin} mit $k = |B_i^{<j}|$; er heißt \emph{regulär}, falls
+$|B_i| = k$ gilt, und andernfalls \emph{Fallback-$k$-Bin} \cite[S.~80]{cao1995}.
+\end{definition}
+
+Ein $k$-Bin nimmt also $k$ Aufgaben auf, bevor der nächste Bin eröffnet wird; ein
+Fallback-$k$-Bin erhält später weitere.
+
+Eine Gewichtsfunktion ordnet jeder Aufgabe ein Gewicht zu, das von ihrer Größe und vom Typ ihres
+FFD-Bins abhängt.
+Sie wird so gewählt, dass jeder FFD-Bin ein Gesamtgewicht von mindestens $x$ trägt und jeder Bin
+der $q$-Packung höchstens $x$, von endlich vielen Ausnahmen abgesehen.
+Ist $w$ das Gesamtgewicht aller Aufgaben und $E$ das Mehrgewicht der Ausnahmebins, so folgt
+$w \ge (m+1)\,x$ aus der ersten und $w \le m\,x + E$ aus der zweiten Eigenschaft; ein Widerspruch
+entsteht, sobald $E < x$ nachgewiesen ist.
+
+\textcite{cao1995} setzt $p/q = (120 - 3\delta)/100$ mit $\delta < 20/33$ an, schreibt die
+kleinste Aufgabe als $p_n = 20 + \Delta - 3\delta$ mit $\Delta > 0$ und unterscheidet die vier
+Fälle $\Delta > 5\delta$, $\frac{15}{4}\delta \le \Delta \le 5\delta$,
+$2{,}5\,\delta \le \Delta < \frac{15}{4}\delta$ und $\Delta < 2{,}5\,\delta$.
+Die Gewichte hängen dabei von Aufgabentypen $X_2$--$X_6$, $Y_1$--$Y_3$ und $Z$ ab, die über
+Größenbereiche relativ zu $\Delta$ und $\delta$ definiert sind.
+Die Fallunterscheidung füllt die Seiten 81--96 von \cite{cao1995} und stützt sich zusätzlich auf
+zwei Lemmata aus \cite{yue1990}; sie wird hier nicht nachvollzogen.
+
+\section{Untere Schranke}
+\label{sec:untere-schranke}
+
+\begin{lemma}[Untere Schranke]
+\label{lem:untere-schranke}
+Für jedes $m \ge 13$ gilt $r_m \ge 13/11$.
+\end{lemma}
+
+\begin{proof}
+Sei $\Gamma$ die Instanz aus $m-13$ Aufgaben der Größe $66$ und den $39$ Aufgaben
+\[
+  40\ (8\text{-mal}), \quad 25\ (8\text{-mal}), \quad 24\ (2\text{-mal}), \quad
+  17\ (2\text{-mal}), \quad 16\ (3\text{-mal}), \quad 13\ (16\text{-mal})
+\]
+von \textcite{friesen1984}; die Gesamtgröße beträgt $66\,m$.
+
+Die Packung aus $(40, 13, 13)$ achtmal, $(25, 25, 16)$ dreimal, $(25, 24, 17)$ zweimal und je
+einem Bin für die Aufgaben der Größe $66$ belegt $m$ Bins mit Last genau $66$; also ist
+$\mathrm{OPT}[\Gamma, 66] \le m$.
+
+Sei $66 \le C < 78$.
+Die Aufgaben der Größe $66$ werden zuerst platziert und belegen wegen $2 \cdot 66 > C$ je einen
+eigenen Bin; wegen $C - 66 < 12 < 13$ nehmen diese Bins keine weitere Aufgabe auf.
+Auf den übrigen Aufgaben erzeugt FFD die Bins $(40, 25)$ achtmal, $(24, 24, 17)$,
+$(17, 16, 16, 16)$ und $(13, 13, 13, 13, 13)$ dreimal - jeder mit Last $65$ - sowie einen Bin
+für die verbleibende Aufgabe der Größe $13$, die wegen $65 + 13 = 78 > C$ in keinen der übrigen
+passt.
+Also ist $\mathrm{FFD}[\Gamma, C] = m+1 > m$.
+
+Damit ist $\Gamma$ für jedes solche $C$ ein $(C/66)$-Gegenbeispiel für $m$ Maschinen, und das
+Supremum über $C < 78$ liefert $r_m \ge 78/66 = 13/11$.
+\end{proof}
+
+Mit $r_m \le 13/11$ nach \textcite{cao1995} folgt aus Lemma~\ref{lem:untere-schranke}
+$r_m = 13/11$ für alle $m \ge 13$; für $m < 13$
+ist nach Abschnitt~\ref{sec:chronologie} nur die obere Schranke bekannt.
+Die Instanz für $m = 13$ wird in Abschnitt~\ref{sec:friesen} empirisch untersucht.
+Auf der Schranke $13/11$ beruhen über~\eqref{eq:ffd-akzeptiert} die Abschätzungen der
+Kapitel~\ref{kap:alternative} und~\ref{chap:evaluation}.

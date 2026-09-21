@@ -1,0 +1,122 @@
+\chapter{Fazit}
+\label{chap:fazit}
+
+Zwei Fragen hat diese Arbeit verfolgt.
+Die erste galt der Gütegarantie von MULTIFIT und der Herleitung, welche zu ihr führt.
+Die zweite galt der Subroutine, also dem Bin-Packing-Verfahren, das über jede getestete
+Kapazität entscheidet.
+Beide Stränge treffen sich in Implikation~\eqref{eq:ffd-akzeptiert}: Dort wird aus einer
+Eigenschaft der Subroutine eine Aussage über den Makespan.
+
+\paragraph{Die Performanzanalyse.}
+Kapitel~\ref{chap:performanz} führt den Nachweis $r_m \le 5/4$ vollständig aus
+(Theorem~\ref{thm:schranke54}).
+Getragen wird er von Struktureigenschaften eines minimalen Gegenbeispiels: dem Löschlemma, dem
+Dominanzlemma, der Mindestzahl von Aufgaben je Bin der $q$-Packung und den Größenschranken.
+Theorem~\ref{thm:guete} verbindet das Grenzverhältnis anschließend mit dem Verfahren und liefert
+$R_m(\mathrm{MF}(k)) \le r_m + 2^{-k}$.
+Die Binärsuche kostet also nur einen additiven Term, welcher sich mit jedem Schritt halbiert.
+In die Gegenrichtung führt Lemma~\ref{lem:untere-schranke} den Nachweis $r_m \ge 13/11$ für
+$m \ge 13$ an einer Instanz von \textcite{friesen1984}.
+Zusammen mit der oberen Schranke von \textcite{cao1995} ist das Grenzverhältnis für diese
+Maschinenzahlen exakt bestimmt.
+
+Die Schranke $13/11$ selbst bleibt unbewiesen; Abschnitt~\ref{sec:beweisidee1311} stellt nur
+ihre Beweisidee dar.
+Caos Fallunterscheidung über $\Delta$ füllt sechzehn Seiten und stützt sich zusätzlich auf
+\textcite{yue1990}.
+Zwischen der hier bewiesenen Schranke $5/4$ und dem für $m \ge 13$ exakten Wert $13/11$ bleibt
+somit eine Lücke; geschlossen wird sie in \cite{cao1995} über diese Fallunterscheidung.
+
+\paragraph{Der Austausch der Subroutine.}
+Kapitel~\ref{kap:alternative} prüft drei Alternativen, und die Befunde fallen verschieden aus.
+Für MFFD gibt Lemma~\ref{lem:kollaps} eine Klasse von Instanzen an, auf der sich die Wahl
+überhaupt nicht auswirkt: Ab $\rho(\Gamma) \ge 2$ erzeugen beide Subroutinen bei jeder
+getesteten Kapazität dieselbe Packung.
+Geprüft ist das Kriterium in einem einzigen Durchlauf der Aufgabenliste.
+Beim $\mathrm{OPT}+1$-Algorithmus von \textcite{jansen_solisoba2010} entsteht durch die
+Modifikation zu einem $\varepsilon$-dualen Verfahren eine eigene Garantie:
+Korollar~\ref{kor:multifit-jansen-dual} liefert den Makespan
+$(1+\varepsilon)(1+2^{-k}) \cdot C^{*}_{\max}(\Gamma)$ mit $\varepsilon = 1/(2d-1)$.
+Neben der Schranke für MULTIFIT+FFD ist sie die einzige Makespan-Garantie dieser Arbeit.
+
+Für das Konfigurations-LP von \textcite{gilmore_gomory1961} fällt das Ergebnis negativ aus.
+Lemma~\ref{lem:gg-rundung} lässt nach dem Runden $m + d - 1$ Bins zu und damit gerade die
+$d-1$ Bins, die das Akzeptanzkriterium nicht mehr zulässt;
+Implikation~\eqref{eq:ffd-akzeptiert} ist folglich nicht erfüllt.
+Was das Verfahren stattdessen mitbringt, ist eine zertifizierte Ablehnung: Aus
+$\lceil \mathrm{LP}[\Gamma,C] \rceil > m$ folgt $C < C^{*}_{\max}(\Gamma)$, während FFD im
+entscheidenden Fall $\mathrm{FFD}[\Gamma,C] = m+1$ nichts über
+$\mathrm{OPT}[\Gamma,C]$ aussagt.
+
+\paragraph{Was die Messungen zeigen.}
+Auf den \EvalInstanzen{} Instanzen der fünf Benchmark-Datensätze überschreitet kein gemessenes
+Verhältnis $13/11$; der größte Wert beträgt \EvalMaxRatioOpt.
+MULTIFIT+MFFD liefert dabei in \EvalWins{} Fällen einen kleineren und in \EvalLosses{} Fällen
+einen größeren Makespan als MULTIFIT+FFD.
+Sämtliche \EvalAbweichungen{} Abweichungen liegen unterhalb von $\rho = 2$, wie es
+Lemma~\ref{lem:kollaps} verlangt.
+Ein systematischer Vorteil der aufwendigeren Subroutine zeigt sich auf diesen Instanzen nicht.
+
+Die zweite Versuchsreihe trennt Bin-Packing-Güte und Makespan noch deutlicher.
+Auf dem HM-Gitter erreicht MULTIFIT+FFD auf \HmOptimalffd{} der Instanzen den optimalen
+Makespan, mit dem $\varepsilon$-dualen Algorithmus sind es \HmOptimaljansendual.
+Gegenüber der Grundlinie gewinnt MULTIFIT mit dem $\mathrm{OPT}+1$-Algorithmus dennoch nicht
+durchgängig: \HmJansenBesserFFD{} Instanzen fallen besser aus, \HmJansenSchlechterFFD{}
+schlechter.
+Den Grund liefert Abschnitt~\ref{sub:hm-garantien}: FFD verwirft \HmZuUnrechtFfd{} Kapazitäten,
+für die eine Packung in $m$ Bins existiert, der $\mathrm{OPT}+1$-Algorithmus \HmZuUnrechtJansen{}
+- nur an anderen Stellen.
+Für den Makespan zählt demnach nicht, wie nah eine Subroutine an $\mathrm{OPT}[\Gamma,C]$
+herankommt, sondern welche Kapazitäten sie annimmt.
+Genau das besagt Implikation~\eqref{eq:ffd-akzeptiert}.
+
+Die Laufzeiten ordnen sich ebenfalls anders, als es die Güte nahelegt.
+Das exakte Konfigurationsprogramm liegt mit \HmZeitMedianggip{}~ms im Median vor dem
+$\mathrm{OPT}+1$-Algorithmus mit \HmZeitMedianjansen{}~ms, dessen innere Binärsuche mehrere
+Modelle je Kapazität löst.
+Wächst die Anzahl der Aufgaben um den Faktor \HmSkalNFaktor, so steigt die Laufzeit von
+MULTIFIT+FFD um das \HmSkalFaktorffd-fache, die der High-Multiplicity-Verfahren dagegen nur um
+das \HmSkalFaktorMin- bis \HmSkalFaktorMax-fache.
+
+\paragraph{Grenzen der Aussagen.}
+Aus den Messungen folgt keine Schranke.
+Dass auf \EvalInstanzen{} Instanzen kein Verhältnis über $13/11$ auftritt, ist für
+MULTIFIT+FFD mit der bewiesenen Schranke verträglich und begründet für MULTIFIT+MFFD keine.
+Ähnliches gilt für das Kollaps-Lemma: Es beschreibt eine Klasse, auf der die Subroutinenwahl
+folgenlos bleibt, und gerade der bekannte Extremfall liegt außerhalb, denn die Instanz von
+\textcite{friesen1984} hat $\rho = 1{,}65$.
+Zur oberen Schranke trägt das Lemma somit nichts bei.
+
+Die zweite Versuchsreihe deckt zudem nur $d \le \HmDMax$ ab, während die fünf
+Benchmark-Datensätze im Median zwischen \HmDBenchMedianMin{} und \HmDBenchMedianMax{}
+verschiedene Aufgabengrößen enthalten; dort sind die High-Multiplicity-Verfahren nicht gemessen
+worden.
+Ein Teil der verwendeten Optima stammt aus \textcite{akram2025} und ist nicht nachgerechnet
+worden, und sämtliche Laufzeiten gelten für die beschriebene Implementierung und Umgebung.
+
+\paragraph{Offene Fragen.}
+Die naheliegendste betrifft MFFD.
+Auf der Instanz von \textcite{friesen1984} liefert MULTIFIT+MFFD den kleineren Makespan
+(Abschnitt~\ref{sec:friesen}); über das Verhalten im schlechtesten Fall sagt das jedoch nichts,
+und ob $r_m(\mathrm{MF}{+}\mathrm{MFFD}) < 13/11$ gilt, bleibt offen.
+Dahinter steht die allgemeinere Frage, für welche Subroutinen eine Entsprechung
+von~\eqref{eq:ffd-akzeptiert} überhaupt besteht: Für FFD ist sie bewiesen, für das
+Konfigurations-LP widerlegt, für MFFD unbekannt.
+Unbestimmt bleibt ferner das Grenzverhältnis für kleine Maschinenzahlen, denn
+Lemma~\ref{lem:untere-schranke} setzt $m \ge 13$ voraus; für $m < 13$ klafft zwischen
+$r_m \ge 1$ aus Bemerkung~\ref{bem:rm-mindestens-eins} und der oberen Schranke $13/11$ eine
+Lücke.
+
+Neu entstanden ist die Frage nach der Reichweite der $\varepsilon$-dualen Konstruktion.
+Über $\varepsilon = 1/(2d-1)$ wird ihre Garantie mit wachsender Anzahl verschiedener
+Aufgabengrößen schärfer, die Laufzeit des Verfahrens nach Abschnitt~\ref{sub:jansen-laufzeit}
+jedoch doppelt exponentiell in $d$.
+Am schwächsten ist die Garantie demnach dort, wo sie sich berechnen lässt.
+Die in Abschnitt~\ref{sub:gg-modell} beschriebene Spaltengenerierung hält das
+Konfigurationsmodell auch bei wachsendem $d$ handhabbar; implementiert ist sie hier nicht, und
+auf das ganzzahlige Programm des $\varepsilon$-dualen Verfahrens ist sie nicht übertragen
+worden.
+Zu klären wäre schließlich, ob sich die zertifizierte Ablehnung des Konfigurations-LPs mit einer
+schnellen Subroutine verbinden lässt, welche das Suchintervall zwar nicht beweisbar eingrenzt,
+dafür aber deutlich schneller entscheidet (Abschnitt~\ref{sub:hm-laufzeit}).

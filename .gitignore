@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ropeproject/
+Implementation/.venv/
+
+# LaTeX build output (the submitted PDF is Thesis/bachelorarbeit.pdf)
+Thesis/build/
+*.aux
+*.log
+*.bbl
+*.bcf
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.run.xml
+
+# kept locally only: unit tests, literature, supervisor notes, slides, assistant config
+Implementation/binpacking/test_*.py
+Paper/
+Slides/
+Anmerkungen_Felix/
+aktuelle_fragen_an_felix.txt
+.claude/
+.claude.md
+CLAUDE.md
+pympress
+gurobi.log
+
+# original instances from github.com/anon495351/pcmax (no license);
+# fetched by Implementation/Test_Instances/fetch_pcmax.py
+Implementation/Test_Instances/frangioni/*.txt
+Implementation/Test_Instances/lawrinenko/*.txt
+Implementation/Test_Instances/berndt/*.txt
+Implementation/Test_Instances/planted/*-exact-*.txt
+!Implementation/Test_Instances/*/opt_known.txt
+!Implementation/Test_Instances/*/readme.txt
