@@ -1,0 +1,26 @@
+\chapter*{Zusammenfassung}
+
+Diese Arbeit untersucht MULTIFIT, ein Approximationsverfahren für die Makespan-Minimierung auf
+identischen Maschinen, welches eine Binärsuche über die Kapazität mit dem Bin-Packing-Verfahren
+FFD als Subroutine verbindet.
+Im ersten Teil wird die Performanzanalyse geschlossen aufbereitet: Die Schranke $5/4$ für das
+Grenzverhältnis, auf dem die Güte von MULTIFIT beruht, wird vollständig bewiesen und mit dem
+Makespan nach $k$ Suchschritten verbunden; die schärfere Schranke $13/11$ wird eingeordnet, und
+für mindestens $13$ Maschinen wird gezeigt, dass sie sich nicht verbessern lässt.
+Im zweiten Teil wird die Subroutine ausgetauscht.
+Für MFFD wird gezeigt, dass es innerhalb von MULTIFIT dieselbe Zuordnung wie FFD liefert, sobald
+die mittlere Maschinenlast mindestens doppelt so groß ist wie die größte Aufgabe.
+Ein $\mathrm{OPT}+1$-Algorithmus für Instanzen mit $d$ verschiedenen Aufgabengrößen wird zu einem
+$\varepsilon$-dualen Verfahren umgebaut, welches höchstens die optimale Binzahl verwendet und
+dafür die Kapazität um den Faktor $1+\varepsilon$ überschreiten darf; MULTIFIT erreicht damit
+einen Makespan von höchstens $(1+\varepsilon)(1+2^{-k})$ mal dem Optimum, wobei
+$\varepsilon = 1/(2d-1)$ ist.
+Für das Konfigurations-LP reicht die beim Runden entstehende Schranke dagegen nicht aus, um die
+Gütegarantie von MULTIFIT zu tragen.
+Auf \EvalInstanzen{} Benchmark-Instanzen überschreitet kein gemessenes Verhältnis zum optimalen
+Makespan den Wert $13/11$, und MFFD liefert keinen systematisch kleineren Makespan als FFD.
+Auf \HmInstanzen{} Instanzen mit wenigen verschiedenen Aufgabengrößen liefert MULTIFIT mit dem
+$\mathrm{OPT}+1$-Algorithmus auf \HmJansenBesserFFD{} Instanzen einen kleineren, auf
+\HmJansenSchlechterFFD{} jedoch einen größeren Makespan als mit FFD.
+Für den Makespan entscheidet somit nicht die Bin-Packing-Güte der Subroutine, sondern welche
+Kapazitäten sie annimmt.

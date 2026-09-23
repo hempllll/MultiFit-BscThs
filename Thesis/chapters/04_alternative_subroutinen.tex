@@ -121,9 +121,9 @@ Die Binärsuche trifft damit in jeder Iteration dieselbe Verzweigungsentscheidun
 \end{proof}
 
 \begin{bemerkung}
-Der Beweis nutzt von der oberen Intervallgrenze nichts und gilt daher für jede der
-gebräuchlichen Varianten, etwa $c_{\mathrm{high}}^{(0)} = \sum_j p_j/m + p_{\max}$ oder
-$c_{\mathrm{high}}^{(0)} = \max(\sum_j p_j/m,\, 2 p_{\max})$.
+Der Beweis nutzt von der oberen Intervallgrenze nichts und gilt daher für jede zulässige
+Wahl, etwa die hier verwendete Grenze $c_{\mathrm{high}}^{(0)} = \sum_j p_j/m + p_{\max}$ oder
+die ursprüngliche Grenze $\max(2\sum_j p_j/m,\, p_{\max})$ von \textcite{coffman1978}.
 Er überträgt sich außerdem auf die Variante mit ganzzahligen Kapazitäten:
 Sind alle $p_j$ ganzzahlig, so folgt aus $\rho(\Gamma) \ge 2$ auch
 $\lfloor \sum_j p_j/m \rfloor \ge \lfloor 2 p_{\max} \rfloor = 2 p_{\max}$,
@@ -180,7 +180,7 @@ Mit $\mathrm{J}[\Gamma, C]$ wird im Folgenden die Anzahl der Bins bezeichnet, di
 \subsection{Laufzeit}
 \label{sub:jansen-laufzeit}
 
-Die Laufzeit beträgt
+Die Laufzeit beträgt \cite[Theorem~1.1]{jansen_solisoba2010}
 \[
   d^{O(d2^d)} \times 2^{O(8^d)} \times O\!\left((\log^2 n + \log C)^3 \log^5 n\right).
 \]
@@ -202,13 +202,16 @@ MILP-Größen aber praktikabel; die gemessenen Laufzeiten stehen in
 Abschnitt~\ref{sub:hm-laufzeit}.
 
 Im Originalalgorithmus wird über alle Teilmengen $S^B \subseteq \mathcal{K}^B$ der Größe $2^d$ iteriert,
-da Lenstras Algorithmus eine feste obere Schranke an die Anzahl ganzzahliger Variablen voraussetzt.
-Mit Gurobi entfällt diese Einschränkung: Es genügt, ein einziges MILP mit allen großen Konfigurationen
-als ganzzahlige Variablen aufzustellen. Nach \textcite{eisenbrand_shmonin2006} (dort zitiert in \cite{jansen_solisoba2010})
-setzt die optimale Lösung ohnehin höchstens $2^d$ dieser Variablen auf einen Wert größer null -
-Gurobi findet diese aktiven Konfigurationen selbst.
-Die Subset-Enumeration wäre in der Praxis auch gar nicht durchführbar: Für $d = 3$ gibt es bereits
-$\binom{125}{8} \approx 10^{12}$ Teilmengen, für $d = 5$ etwa $10^{117}$ -
+da Lenstras Algorithmus eine feste obere Schranke an die Anzahl ganzzahliger Variablen voraussetzt
+\cite{jansen_solisoba2010}.
+Dass solche Teilmengen genügen, folgt aus einem Ergebnis von \textcite{eisenbrand_shmonin2006}
+(dort zitiert in \cite{jansen_solisoba2010}): Das ganzzahlige Programm über alle Konfigurationen
+besitzt eine optimale Lösung, in der höchstens $2^d$ Variablen positiv sind.
+Mit Gurobi entfällt die Einschränkung: Es genügt, ein einziges MILP mit allen großen Konfigurationen
+als ganzzahlige Variablen aufzustellen.
+Die Subset-Enumeration wäre in der Praxis auch gar nicht durchführbar: Mit der Schranke
+$|\mathcal{K}^B| \le \binom{3d-1}{d}$, welche Schritt~1 begründet, sind es für $d = 3$ bis zu
+$\binom{56}{8} \approx 1{,}4 \cdot 10^{9}$ Teilmengen, für $d = 5$ bis zu etwa $10^{70}$ -
 verglichen mit einem einzigen MILP, dessen Zahl ganzzahliger Variablen für festes $d$
 konstant beschränkt ist.
 
@@ -270,10 +273,14 @@ Für jede Konfiguration $a$ mit $\tilde{x}_{a} \geq 1$ werden $\tilde{x}_{a}$
 Bins mit passendem großem Anteil $a^B$ um die kleinen Aufgaben von $a$ ergänzt.
 Da $\tilde{x}_{a} = \lfloor x^+_{a} \rfloor \le x^+_{a}$, folgt aus Nebenbedingung~1 des MILP, dass für jedes $b$ genügend Bins
 bereitstehen: $\sum_{a^B = b} \tilde{x}_{a} \le y^+_b$.
-Kleine Aufgaben, die nach dem Abrunden nicht abgedeckt sind, werden gesammelt und in einen
-einzigen zusätzlichen Bin gepackt.
-Dass alle Reste dort hineinpassen, folgt aus dem in \cite{jansen_solisoba2010} geführten
-Rundungsargument; die Packung verwendet damit insgesamt höchstens $m^* + 1$ Bins.
+Kleine Aufgaben, die nach dem Abrunden nicht abgedeckt sind, verteilen
+\textcite{jansen_solisoba2010} zunächst mit Next Fit in nicht absteigender Größe auf die
+vorhandenen $m^*$ Bins.
+Nach ihrem Rundungsargument bleiben dabei höchstens $2d - 1$ Aufgaben übrig, jede kleiner als
+$\varepsilon C$, und diese passen gemeinsam in einen einzigen zusätzlichen Bin; die Packung
+verwendet damit insgesamt höchstens $m^* + 1$ Bins \cite[Lemma~3.1]{jansen_solisoba2010}.
+Die Implementierung verteilt die Reste an dieser Stelle mit First Fit in absteigender Größe und
+legt nur das, was danach noch übrig ist, in den zusätzlichen Bin.
 
 \subsection{Theoretische Anwendbarkeit als MULTIFIT-Subroutine}
 \label{sub:anwendbarkeit}
@@ -415,8 +422,9 @@ Die Konstruktion eines $\varepsilon$-dualen Bin-Packing-Algorithmus ist damit de
 \subsubsection{Jansen-Dual: Modifikation des Rundungsschritts}
 
 Der Algorithmus aus Abschnitt~\ref{sub:anwendbarkeit} gibt höchstens $\mathrm{OPT}[\Gamma, C]+1$
-Bins aus; der Extrabin entsteht in Schritt~3, weil die verbliebenen kleinen Aufgaben dort
-in einen zusätzlichen Bin der Kapazität~$C$ gepackt werden \cite{jansen_solisoba2010}.
+Bins aus; der Extrabin entsteht in Schritt~3, weil die kleinen Aufgaben, die nach dem Verteilen
+auf die vorhandenen Bins übrig bleiben, dort in einen zusätzlichen Bin der Kapazität~$C$ gepackt
+werden \cite{jansen_solisoba2010}.
 Die folgende Modifikation verteilt diese Aufgaben stattdessen auf bestehende Bins und eliminiert
 den Extrabin - auf Kosten einer geringen Kapazitätsüberschreitung.
 
@@ -427,9 +435,9 @@ Schritt~3 ändert sich wie folgt:
 \begin{enumerate}[label=\arabic*.]
   \item Runde ab: $\bar{x}_{a} = \lfloor x^+_{a} \rfloor$ für alle Konfigurationen~$a$.
   \item Weise jedem der $m^*$ Bins seine große Konfiguration und die abgerundeten kleinen Aufgaben zu.
-  \item Sammle die verbliebenen kleinen Aufgaben $L$ (nicht abgedeckt durch die gerundeten $\bar{x}$-Werte);
-        nach Lemma~3.1 in \cite{jansen_solisoba2010} gilt $|L| \le 2d-1$
-        (das Lemma gilt hier unverändert, da die Schranke allein aus dem Rundungsargument der Schritte~1 und~2 folgt, die gegenüber dem Original unverändert sind).
+  \item Sammle die verbliebenen kleinen Aufgaben $L$ (nicht abgedeckt durch die gerundeten $\bar{x}$-Werte).
+        Anders als im Original werden sie nicht vorab mit Next Fit verteilt; der Beweis von
+        Lemma~\ref{lem:jansen-dual} braucht keine Schranke an $|L|$.
   \item Platziere jede Aufgabe aus~$L$ in einem Bin mit aktueller Last $< C$.
   \item Gib die $m^*$ Bins aus - kein zusätzlicher Bin wird geöffnet.
 \end{enumerate}
@@ -571,7 +579,7 @@ $\mathrm{OPT}+1$-Algorithmus mit innerer Binärsuche, seine $\varepsilon$-duale 
 FFD und MFFD sind kombinatorische Verfahren, welche die Aufgaben nach festen Regeln
 nacheinander platzieren; der Algorithmus von Jansen und Solis-Oba
 löst dagegen ein ganzzahliges Programm über Konfigurationen und rundet dessen Lösung.
-Dieselbe Modellierung liegt schon dem ältesten Zugang zum Bin Packing zugrunde, dem linearen
+Dieselbe Modellierung liegt schon einem klassischen Zugang zum Bin Packing zugrunde, dem linearen
 Programm über Konfigurationen - kurz \emph{Konfigurations-LP} - von
 \textcite{gilmore_gomory1961,gilmore_gomory1963}.
 Dieser Abschnitt beschreibt das Modell, seine Rundung zu einer zulässigen Packung und
@@ -793,8 +801,9 @@ Deshalb wird hier abgerundet.
 Als Subroutine erhält das Verfahren dieselbe Schnittstelle wie FFD und MFFD: Eingabe sind die
 Aufgaben von $\Gamma$ und eine Kapazität $C$, Ausgabe ist eine Packung.
 MULTIFIT akzeptiert $C$ genau dann, wenn $\mathrm{GG}[\Gamma, C] \le m$ gilt.
-Weil die Kapazitäten ganzzahlig sein müssen - $\mathcal{K}(\Gamma, C)$ ist nur für ganzzahliges
-$C$ aufzählbar - wird die Variante der Binärsuche mit ganzzahligen Kapazitäten verwendet.
+Da die Aufgabengrößen ganzzahlig sind, lässt eine Kapazität $C$ dieselben Packungen zu wie
+$\lfloor C \rfloor$; verwendet wird deshalb die Variante der Binärsuche mit ganzzahligen
+Kapazitäten (Abschnitt~\ref{sub:hm-aufbau}).
 
 Gegenüber FFD ändert sich die Bedeutung einer Ablehnung.
 Wegen $\lceil \mathrm{LP}[\Gamma, C] \rceil \le \mathrm{OPT}[\Gamma, C] \le \mathrm{GG}[\Gamma, C]$
@@ -817,7 +826,8 @@ Die Differenz $\mathrm{GG}[\Gamma, C] - \lceil \mathrm{LP}[\Gamma, C] \rceil$ mi
 den Verlust, den die Rundung gegenüber der LP-Schranke verursacht.
 
 Eine Gütegarantie für den Makespan überträgt sich daraus nicht.
-Die Schranke von \textcite{cao1995} für MULTIFIT+FFD beruht auf
+Die Makespan-Schranke $13/11 + 2^{-k}$ für MULTIFIT+FFD, die Theorem~\ref{thm:guete} mit
+$r_m \le 13/11$ nach \textcite{cao1995} liefert, beruht auf
 Implikation~\eqref{eq:ffd-akzeptiert}: Oberhalb von $r_m \cdot C^{*}_{\max}(\Gamma)$ kommt FFD
 stets mit $m$ Bins aus, die Binärsuche akzeptiert dort also jede Kapazität und kann ihre obere
 Intervallgrenze bis auf $r_m \cdot C^{*}_{\max}(\Gamma)$ absenken.

@@ -344,14 +344,12 @@ Die Schranke $5/4 = 1{,}25$ ist eine obere Schranke an $r_m$ und nicht scharf:
 \textcite{cao1995} gilt $r_m \le 13/11$.
 Sie ist auch kein Worst-Case-Verhältnis von Makespans - welche Aussage über MULTIFIT aus einer
 Schranke an $r_m$ folgt, klärt der folgende Abschnitt.
-Was fehlt, um von $5/4$ auf $13/11$ zu kommen, sind Gewichtsfunktionen und eine Fallunterscheidung
-über die Größenverhältnisse; beides beschreibt Abschnitt~\ref{sec:beweisidee1311}.
+Der Weg von $5/4$ zu $13/11$ führt bei \textcite{cao1995} über Gewichtsfunktionen und eine
+Fallunterscheidung über die Größenverhältnisse; beides beschreibt
+Abschnitt~\ref{sec:beweisidee1311}.
 
 \section{Von \texorpdfstring{$r_m$}{rm} zur Güte von MULTIFIT}
 \label{sec:guete-multifit}
-
-Auch die folgende Schranke stammt aus \cite{coffman1978}; der Beweis ist eine eigene
-Ausarbeitung.
 
 \begin{bemerkung}[Untere Schranke an $r_m$]
 \label{bem:rm-mindestens-eins}
@@ -363,6 +361,9 @@ $\mathrm{FFD}[\Gamma, p] = m+1 > m$, während $\mathrm{OPT}[\Gamma, 2] = \lceil 
 Damit ist $\Gamma$ ein $(p/2)$-Gegenbeispiel für $m$ Maschinen, und das Supremum über $p < 2$
 liefert $r_m \ge 1$.
 \end{bemerkung}
+
+Auch die folgende Schranke stammt aus \cite{coffman1978}; der Beweis ist eine eigene
+Ausarbeitung.
 
 \begin{theorem}[nach \cite{coffman1978}]
 \label{thm:guete}
@@ -479,7 +480,9 @@ Sei $\Gamma$ die Instanz aus $m-13$ Aufgaben der Größe $66$ und den $39$ Aufga
   40\ (8\text{-mal}), \quad 25\ (8\text{-mal}), \quad 24\ (2\text{-mal}), \quad
   17\ (2\text{-mal}), \quad 16\ (3\text{-mal}), \quad 13\ (16\text{-mal})
 \]
-von \textcite{friesen1984}; die Gesamtgröße beträgt $66\,m$.
+von \textcite{friesen1984}; dieselben $39$ Aufgaben verwenden auch
+\textcite[Beispiel~1, S.~38]{friesen_langston1986}.
+Die Gesamtgröße beträgt $66\,m$.
 
 Die Packung aus $(40, 13, 13)$ achtmal, $(25, 25, 16)$ dreimal, $(25, 24, 17)$ zweimal und je
 einem Bin für die Aufgaben der Größe $66$ belegt $m$ Bins mit Last genau $66$; also ist

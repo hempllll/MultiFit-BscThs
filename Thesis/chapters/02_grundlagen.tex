@@ -138,6 +138,9 @@ $\mathrm{MF}(k)$.
 Ein Aufruf mit $c_{\mathrm{high}}^{(0)}$ vor der Schleife stellt sicher, dass stets eine
 gespeicherte Packung vorliegt; er ist der Rückfall für den Fall, dass alle $k$ Tests scheitern,
 und lässt sich ebenso ans Ende verschieben.
+Als obere Grenze wählen \textcite{coffman1978} ursprünglich
+$\max\bigl(\tfrac{2}{m}\sum_j p_j,\, p_{\max}\bigr)$ \cite[S.~37]{friesen_langston1986}; diese
+Arbeit verwendet durchgehend die Grenze aus~\eqref{eq:startintervall}.
 
 Dass beide Grenzen aus \eqref{eq:startintervall} zulässig gewählt sind, hält das folgende Lemma
 fest: Die untere Grenze überschreitet den gesuchten Wert nicht, und an der oberen gelingt der
@@ -176,7 +179,7 @@ $C^{*}_{\max}(\Gamma, m) \le c_{\mathrm{high}}^{(0)}$ nach Lemma~\ref{lem:dualit
 Die Güte von MULTIFIT wird über den folgenden Wert ausgedrückt, der die Tiefe der Binärsuche
 ausklammert und allein das Verhältnis von FFD zum Optimum erfasst.
 
-\begin{definition}[Grenzverhältnis $r_m$]
+\begin{definition}[{Grenzverhältnis $r_m$, nach \cite[S.~79]{cao1995}}]
 \label{def:rm}
 Eine Instanz $\Gamma$ heißt $(p/q)$-\emph{Gegenbeispiel} für $m$ Maschinen, wenn
 $\mathrm{FFD}[\Gamma, p] > m \ge \mathrm{OPT}[\Gamma, q]$ gilt.
