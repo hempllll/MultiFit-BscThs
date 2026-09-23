@@ -4,7 +4,14 @@
 % T1 ist noetig, damit Woerter mit Umlauten und ss getrennt werden.
 \usepackage[T1]{fontenc}
 \usepackage{babel}
-\usepackage{hyperref}
+% hidelinks: ohne die Option zeichnet hyperref farbige Rahmen um jeden Verweis.
+% Die sind Annotationen und werden mangels Print-Flag zwar nicht gedruckt, sind
+% in jedem Betrachter aber sichtbar.
+\usepackage[hidelinks]{hyperref}
+\hypersetup{
+  pdftitle={Analyse und Optimierung von MULTIFIT Algorithmen},
+  pdfauthor={Fridjoff Hempel},
+}
 
 \usepackage[backend=biber,style=alphabetic]{biblatex}
 \usepackage{csquotes}
