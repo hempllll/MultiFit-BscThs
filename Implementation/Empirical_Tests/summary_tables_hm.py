@@ -182,6 +182,32 @@ def rounding_macros(t):
     return m
 
 
+def overload_macros(df, t):
+    # Does the acceptance decision alone determine the makespan? The eps-dual arm
+    # and the exact configuration IP are compared because they accept the same
+    # capacities -- whatever makespan difference remains cannot come from the
+    # decision. It comes from property (ii) of Definition 4.6: the eps-dual arm
+    # may fill a bin up to (1+eps)*C, so the returned packing can exceed the
+    # capacity it was accepted at.
+    if "jansen_dual" not in set(t.arm) or REFERENCE not in set(t.arm):
+        return {}
+    acc = {}
+    for arm in ("jansen_dual", REFERENCE):
+        a = t[(t.arm == arm) & t.accepted.astype(bool)]
+        acc[arm] = a.groupby("instance_file").capacity.apply(frozenset)
+    same = sum(1 for i in acc["jansen_dual"].index
+               if acc["jansen_dual"][i] == acc[REFERENCE].get(i))
+    worse = df[df.makespan_jansen_dual > df[f"makespan_{REFERENCE}"]]
+    # the returned packing belongs to the smallest accepted capacity
+    smallest = acc["jansen_dual"].apply(min)
+    factor = (worse.set_index("instance_file").makespan_jansen_dual
+              / smallest.reindex(worse.instance_file).values)
+    return {"HmEpsGleicheAkzeptanz": num(same),
+            "HmEpsAkzeptanzInstanzen": num(len(acc["jansen_dual"])),
+            "HmEpsSchlechterRef": num(len(worse)),
+            "HmEpsUeberlastMax": num(factor.max(), 4)}
+
+
 def degenerate_macros(df, arms):
     # The instances with rho < 1, which are excluded from the quality tables.
     # rho < 1 means p_max > sum p / m, so OPT >= p_max by Lemma 2.2. Whether the
@@ -474,6 +500,7 @@ def main():
         extra.update(tab_akzeptanz(t) or {})
         extra.update(non_monotonicity_witness(df, t))
         extra.update(rounding_macros(t))
+        extra.update(overload_macros(df, t))
         extra["HmJansenSchlechterFFD"] = num(int((df.makespan_jansen > df.makespan_ffd).sum()))
         extra["HmJansenBesserFFD"] = num(int((df.makespan_jansen < df.makespan_ffd).sum()))
         gg = t[t.arm == "gg_lp"]

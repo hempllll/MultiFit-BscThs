@@ -782,11 +782,13 @@ Korollar~\ref{kor:multifit-jansen-dual}, wobei $\varepsilon = 1/(2d-1)$ hier zwi
 Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} die Güte durch den
 Quotienten $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$, der im Allgemeinen bis
 zu $2$ betragen kann - eine Schranke, die von der Instanz abhängt.
-Für das Konfigurations-LP gibt es überhaupt keine.
-Der Grund steht in Abschnitt~\ref{sub:gg-multifit}: Die Schlussweise hinter der Schranke
-$13/11$ verlangt eine Konstante $r$, für die jede Kapazität $C \ge r \cdot C^{*}_{\max}(\Gamma)$
-mit $m$ Bins auskommt (Implikation~\eqref{eq:ffd-akzeptiert}); Lemma~\ref{lem:gg-rundung} lässt
-dort $m + d - 1$ zu.
+Für das Konfigurations-LP trägt dasselbe Argument mit $\mathrm{GG}[\Gamma,C] \le
+\mathrm{OPT}[\Gamma,C] + d - 1$ nur die schwächere Schranke
+$C^{*}_{\max}(\Gamma, m-d+1)/C^{*}_{\max}(\Gamma, m)$.
+Eine instanzunabhängige Schranke liefert Abschnitt~\ref{sub:gg-multifit} dagegen nicht: Die
+Schlussweise hinter der Schranke $13/11$ verlangt eine Konstante $r$, für die jede Kapazität
+$C \ge r \cdot C^{*}_{\max}(\Gamma)$ mit $m$ Bins auskommt
+(Implikation~\eqref{eq:ffd-akzeptiert}); Lemma~\ref{lem:gg-rundung} lässt dort $m + d - 1$ zu.
 Für das Konfigurations-LP sind die gemessenen Werte damit die einzige verfügbare Aussage über
 das Verhältnis auf diesen Instanzen.
 
@@ -868,6 +870,18 @@ fällt der Vergleich in Tabelle~\ref{tab:hm-paare} in beide Richtungen aus.
 Der $\varepsilon$-duale Algorithmus und das ganzzahlige Programm verwerfen dagegen keine
 einzige zulässige Kapazität (Spalte \emph{zu Unrecht} in Tabelle~\ref{tab:hm-akzeptanz}:
 \HmZuUnrechtJansendual{} und \HmZuUnrechtGgip).
+
+Ihre beiden Zeilen in Tabelle~\ref{tab:hm-akzeptanz} stimmen vollständig überein, und das gilt
+nicht nur in der Summe: Auf allen \HmEpsAkzeptanzInstanzen{} Instanzen akzeptieren die beiden
+Verfahren genau dieselben Kapazitäten.
+Dennoch liefert der $\varepsilon$-duale auf \HmEpsSchlechterRef{} von ihnen einen größeren
+Makespan (Tabelle~\ref{tab:hm-paare}).
+Die Ursache kann folglich nicht die Entscheidung über die Kapazität sein, sondern nur die
+zurückgegebene Packung: Nach Eigenschaft~(ii) von Definition~\ref{def:eps-dual} darf ein Bin die
+Kapazität um den Faktor $1+\varepsilon$ überschreiten, und auf diesen \HmEpsSchlechterRef{}
+Instanzen geschieht das - bis zum \HmEpsUeberlastMax-fachen der akzeptierten Kapazität.
+Für den Makespan zählt demnach nicht allein, welche Kapazitäten eine Subroutine akzeptiert,
+sondern bei einem $\varepsilon$-dualen Verfahren auch, wie hoch es die Bins dabei füllt.
 
 \begin{table}[htbp]
 \centering

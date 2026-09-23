@@ -16,26 +16,37 @@ Kapitel~\ref{chap:grundlagen} führt diese Notation zusammen mit den übrigen Be
 Das zugehörige Entscheidungsproblem ist NP-vollständig \cite{garey_johnson1979}; sofern
 $\mathrm{P} \ne \mathrm{NP}$ gilt, berechnet folglich kein Algorithmus mit polynomieller Laufzeit
 den minimalen Makespan.
-Gefragt sind deshalb Verfahren, welche schnell eine Zuordnung liefern und deren Abstand zum
-Optimum sich beweisen lässt.
+Gefragt sind deshalb Verfahren, welche schnell eine Zuordnung liefern und deren
+\emph{Approximationsgüte} sich beweisen lässt.
+Diese Güte ist der Faktor, um den der erzeugte Makespan den optimalen im schlechtesten Fall
+höchstens übersteigt.
 
 \paragraph{Bekannte Ansätze.}
-Die erste Garantie dieser Art stammt von \textcite{graham1966}.
-Sein Listen-Scheduling durchläuft die Aufgaben in einer beliebigen Reihenfolge und legt jede auf
+Der erste Algorithmus mit einer solchen Garantie stammt von \textcite{graham1966}; mit dem
+Makespan-Problem nimmt die Analyse beweisbar guter Verfahren ihren Ausgang
+\cite[S.~145]{hochbaum_shmoys_1987}.
+Sein List-Scheduling durchläuft die Aufgaben in einer gegebenen Reihenfolge und legt jede auf
 die gerade am wenigsten belastete Maschine; der erzeugte Makespan übersteigt das Optimum dabei um
 höchstens den Faktor $2 - 1/m$.
-Werden die Aufgaben zuvor absteigend sortiert, so sinkt dieser Faktor auf $4/3 - 1/(3m)$, und der
-Wert ist scharf \cite[Theorem~2]{graham1969}.
+Dieser Faktor ist \emph{scharf}, das heißt, kleiner lässt er sich nicht wählen: Es gibt
+Instanzen, auf welchen ihm das Verhältnis von erzeugtem zu optimalem Makespan beliebig nahe
+kommt \cite[S.~1571]{graham1966}.
+Werden die Aufgaben zuvor absteigend sortiert, so sinkt der Faktor auf $4/3 - 1/(3m)$, und auch
+dieser Wert ist scharf \cite[Theorem~2]{graham1969}.
 Diese Regel ist unter dem Namen \emph{Longest Processing Time} bekannt.
 
 Einen anderen Weg gehen \textcite{coffman1978} mit MULTIFIT.
-Statt die Aufgaben unmittelbar zu verteilen, rät das Verfahren eine Kapazität und überlässt einem
-Bin-Packing-Algorithmus die Frage, ob die Aufgaben in $m$ Behälter dieser Kapazität passen.
+Statt die Aufgaben unmittelbar zu verteilen, rät das Verfahren eine Schranke $C$ an den Makespan
+und überlässt einem Bin-Packing-Algorithmus die Frage, ob die Aufgaben in $m$ Behälter der
+Kapazität $C$ passen.
+Beides ist dieselbe Frage, denn eine solche Packung ist genau eine Zuordnung, bei der keine
+Maschine länger als $C$ arbeitet.
 Dieser Algorithmus heißt im Folgenden \emph{Subroutine}; \textcite{coffman1978} setzen dafür
 First Fit Decreasing (FFD) ein, welches die Aufgaben absteigend sortiert und jede in den ersten
 Behälter legt, in den sie noch passt.
-Eine Binärsuche über die Kapazität, nach $k$ Halbierungsschritten abgebrochen, macht daraus eine
-Zuordnung.
+Die Packung erzeugt damit die Subroutine; eine Binärsuche über $C$, nach $k$
+Halbierungsschritten abgebrochen, wählt unter den akzeptierten Schranken die kleinste aus und
+gibt deren Packung zurück.
 Die Güte von MULTIFIT hängt damit an einer rein kombinatorischen Größe, dem
 \emph{Grenzverhältnis} $r_m$: Übersteigt eine Kapazität den optimalen Makespan um mehr als den
 Faktor $r_m$, so kommt FFD mit $m$ Behältern aus (Definition~\ref{def:rm}).
@@ -49,12 +60,15 @@ $\varepsilon > 0$ liefern sie eine Zuordnung mit einem Makespan von höchstens $
 mal dem Optimum.
 Für eine feste Maschinenzahl gibt \textcite{sahni1976} ein solches Schema an, und
 \textcite{hochbaum_shmoys_1987} behandeln den Fall beliebiger Maschinenzahl über \emph{duale}
-Approximation, bei der nicht die Zahl der Behälter, sondern deren Kapazität aufgeweicht wird.
+Approximation, bei der nicht die Zahl der Behälter, sondern deren Kapazität überschritten werden
+darf.
 Bezahlt wird die Genauigkeit mit Laufzeit: Das Schema von Hochbaum und Shmoys läuft in
 $O\bigl((n/\varepsilon)^{1/\varepsilon^{2}}\bigr)$, was die Autoren selbst als nicht praktikabel
 bezeichnen \cite[S.~146]{hochbaum_shmoys_1987}.
 MULTIFIT liegt zwischen beiden Linien, denn seine Güte ist fest, jeder Suchschritt kostet aber
 nur einen einzigen Aufruf der Subroutine.
+Einmaliges Sortieren und $k+1$ solche Aufrufe ergeben eine Laufzeit in $O(k\,n \log n)$, bei
+fester Suchtiefe also $O(n \log n)$ (Abschnitt~\ref{sec:multifit}).
 
 Verbessert worden ist MULTIFIT auch, ohne die Subroutine anzutasten.
 \textcite{friesen_langston1986} ersetzen den Zweig, welcher eine Kapazität verwirft, durch eine
@@ -68,8 +82,9 @@ Welche Subroutine dort steht, ist ein eigener Strang der Literatur.
 FFD benötigt höchstens $11/9$ mal so viele Behälter wie eine optimale Packung, zuzüglich einer
 additiven Konstanten; diese Schranke ist scharf \cite{dosa2007}.
 Für Modified First Fit Decreasing (MFFD) ist mit $71/60$ eine kleinere obere Schranke bewiesen
-\cite{johnson_garey1985, yue_zhang1995}, woraus jedoch nicht folgt, dass MFFD im schlechtesten
-Fall tatsächlich besser abschneidet.
+\cite{johnson_garey1985, yue_zhang1995}.
+Da $11/9$ scharf ist, fällt das asymptotische Worst-Case-Verhältnis von MFFD damit echt kleiner
+aus als jenes von FFD; ob MFFD den Wert $71/60$ überhaupt annimmt, ist dagegen offen.
 Kommen in einer Instanz nur wenige verschiedene Aufgabengrößen vor, so erreicht der
 $\mathrm{OPT}+1$-Algorithmus von \textcite{jansen_solisoba2010} sogar eine Packung mit höchstens
 einem Behälter über dem Optimum; sein Name benennt genau diese Garantie.

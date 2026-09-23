@@ -142,6 +142,13 @@ Als obere Grenze wählen \textcite{coffman1978} ursprünglich
 $\max\bigl(\tfrac{2}{m}\sum_j p_j,\, p_{\max}\bigr)$ \cite[S.~37]{friesen_langston1986}; diese
 Arbeit verwendet durchgehend die Grenze aus~\eqref{eq:startintervall}.
 
+Die Laufzeit setzt sich aus $k+1$ Aufrufen der Subroutine zusammen: den $k$ Tests der Schleife
+und dem Aufruf für den Rückfall.
+Die Aufgabenliste wird dabei einmal sortiert, und jeder Aufruf kostet mit einer geeigneten
+Datenstruktur für First Fit $O(n \log n)$.
+Insgesamt ergibt das $O(k\,n \log n)$, bei fester Suchtiefe $k$ also $O(n \log n)$
+\cite[S.~35]{friesen_langston1986}.
+
 Dass beide Grenzen aus \eqref{eq:startintervall} zulässig gewählt sind, hält das folgende Lemma
 fest: Die untere Grenze überschreitet den gesuchten Wert nicht, und an der oberen gelingt der
 Test.

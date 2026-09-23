@@ -21,7 +21,7 @@ $m \ge 13$ an einer Instanz von \textcite{friesen1984}.
 Zusammen mit der oberen Schranke von \textcite{cao1995} ist das Grenzverhältnis für diese
 Maschinenzahlen exakt bestimmt.
 
-Die Schranke $13/11$ selbst bleibt unbewiesen; Abschnitt~\ref{sec:beweisidee1311} stellt nur
+Die Schranke $13/11$ selbst bleibt in dieser Arbeit unbewiesen; Abschnitt~\ref{sec:beweisidee1311} stellt nur
 ihre Beweisidee dar.
 Caos Fallunterscheidung über $\Delta$ füllt sechzehn Seiten und stützt sich zusätzlich auf
 \textcite{yue1990}.
@@ -31,14 +31,18 @@ somit eine Lücke; geschlossen wird sie in \cite{cao1995} über diese Fallunters
 \paragraph{Der Austausch der Subroutine.}
 Kapitel~\ref{kap:alternative} prüft drei Alternativen, und die Befunde fallen verschieden aus.
 Für MFFD gibt Lemma~\ref{lem:kollaps} eine Klasse von Instanzen an, auf der sich die Wahl
-überhaupt nicht auswirkt: Ab $\rho(\Gamma) \ge 2$ erzeugen beide Subroutinen bei jeder
+überhaupt nicht auswirkt: Ist die mittlere Maschinenlast mindestens doppelt so groß wie die
+größte Aufgabe, in Kurzform $\rho(\Gamma) \ge 2$, so erzeugen MFFD und FFD bei jeder
 getesteten Kapazität dieselbe Packung.
 Geprüft ist das Kriterium in einem einzigen Durchlauf der Aufgabenliste.
 Beim $\mathrm{OPT}+1$-Algorithmus von \textcite{jansen_solisoba2010} entsteht durch die
 Modifikation zu einem $\varepsilon$-dualen Verfahren eine eigene Garantie:
 Korollar~\ref{kor:multifit-jansen-dual} liefert den Makespan
-$(1+\varepsilon)(1+2^{-k}) \cdot C^{*}_{\max}(\Gamma)$ mit $\varepsilon = 1/(2d-1)$.
-Neben der Schranke für MULTIFIT+FFD ist sie die einzige Makespan-Garantie dieser Arbeit.
+$(1+\varepsilon)(1+2^{-k}) \cdot C^{*}_{\max}(\Gamma)$ mit $\varepsilon = 1/(2d-1)$, wobei $d$
+die Anzahl verschiedener Aufgabengrößen bezeichnet.
+Neben der Schranke für MULTIFIT+FFD ist sie die einzige instanzunabhängige Makespan-Garantie
+dieser Arbeit; für den $\mathrm{OPT}+1$-Algorithmus selbst gibt Abschnitt~\ref{sub:anwendbarkeit}
+eine von der Instanz abhängige Schranke an.
 
 Für das Konfigurations-LP von \textcite{gilmore_gomory1961} fällt das Ergebnis negativ aus.
 Lemma~\ref{lem:gg-rundung} lässt nach dem Runden $m + d - 1$ Bins zu und damit gerade die
@@ -60,16 +64,20 @@ Ein systematischer Vorteil der aufwendigeren Subroutine zeigt sich auf diesen In
 
 Die zweite Versuchsreihe trennt Bin-Packing-Güte und Makespan noch deutlicher.
 Auf dem HM-Gitter erreicht MULTIFIT+FFD auf \HmOptimalffd{} der Instanzen den optimalen
-Makespan, mit dem $\varepsilon$-dualen Algorithmus sind es \HmOptimaljansendual.
-Gegenüber der Grundlinie gewinnt MULTIFIT mit dem $\mathrm{OPT}+1$-Algorithmus dennoch nicht
-durchgängig: \HmJansenBesserFFD{} Instanzen fallen besser aus, \HmJansenSchlechterFFD{}
-schlechter.
+Makespan, mit dem $\mathrm{OPT}+1$-Algorithmus sind es \HmOptimaljansen.
+Gegenüber der Grundlinie gewinnt MULTIFIT mit diesem Algorithmus dennoch nicht durchgängig:
+\HmJansenBesserFFD{} Instanzen fallen besser aus, \HmJansenSchlechterFFD{} schlechter.
 Den Grund liefert Abschnitt~\ref{sub:hm-garantien}: FFD verwirft \HmZuUnrechtFfd{} Kapazitäten,
 für die eine Packung in $m$ Bins existiert, der $\mathrm{OPT}+1$-Algorithmus \HmZuUnrechtJansen{}
 - nur an anderen Stellen.
 Für den Makespan zählt demnach nicht, wie nah eine Subroutine an $\mathrm{OPT}[\Gamma,C]$
-herankommt, sondern welche Kapazitäten sie annimmt.
-Genau das besagt Implikation~\eqref{eq:ffd-akzeptiert}.
+herankommt, sondern welche Kapazitäten sie akzeptiert; genau an diese Entscheidung knüpft
+Implikation~\eqref{eq:ffd-akzeptiert} die Gütegarantie von MULTIFIT+FFD.
+Die Entscheidung allein trägt den Makespan jedoch nicht: Der $\varepsilon$-duale Algorithmus
+akzeptiert nach Abschnitt~\ref{sub:hm-garantien} auf allen \HmEpsAkzeptanzInstanzen{} Instanzen
+dieselben Kapazitäten wie das exakte Konfigurationsprogramm und liefert auf
+\HmEpsSchlechterRef{} von ihnen dennoch einen größeren Makespan, weil er einen Bin über die
+akzeptierte Kapazität hinaus füllen darf.
 
 Die Laufzeiten ordnen sich ebenfalls anders, als es die Güte nahelegt.
 Das exakte Konfigurationsprogramm liegt mit \HmZeitMedianggip{}~ms im Median vor dem
@@ -101,12 +109,13 @@ Auf der Instanz von \textcite{friesen1984} liefert MULTIFIT+MFFD den kleineren M
 (Abschnitt~\ref{sec:friesen}); über das Verhalten im schlechtesten Fall sagt das jedoch nichts,
 und ob $r_m(\mathrm{MF}{+}\mathrm{MFFD}) < 13/11$ gilt, bleibt offen.
 Dahinter steht die allgemeinere Frage, für welche Subroutinen eine Entsprechung
-von~\eqref{eq:ffd-akzeptiert} überhaupt besteht: Für FFD ist sie bewiesen, für das
-Konfigurations-LP widerlegt, für MFFD unbekannt.
+von~\eqref{eq:ffd-akzeptiert} überhaupt besteht: Für FFD ist sie bewiesen, für MFFD und für das
+Konfigurations-LP unbekannt - beim Konfigurations-LP reicht die Rundungsschranke aus
+Lemma~\ref{lem:gg-rundung} dafür nicht aus, ein Gegenbeispiel ist damit aber nicht gegeben.
 Unbestimmt bleibt ferner das Grenzverhältnis für kleine Maschinenzahlen, denn
-Lemma~\ref{lem:untere-schranke} setzt $m \ge 13$ voraus; für $m < 13$ klafft zwischen
+Lemma~\ref{lem:untere-schranke} setzt $m \ge 13$ voraus; für $2 \le m < 13$ klafft zwischen
 $r_m \ge 1$ aus Bemerkung~\ref{bem:rm-mindestens-eins} und der oberen Schranke $13/11$ eine
-Lücke.
+Lücke, und nur $r_1 = 1$ ist bestimmt.
 
 Neu entstanden ist die Frage nach der Reichweite der $\varepsilon$-dualen Konstruktion.
 Über $\varepsilon = 1/(2d-1)$ wird ihre Garantie mit wachsender Anzahl verschiedener
