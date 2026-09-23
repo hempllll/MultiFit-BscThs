@@ -9,11 +9,15 @@ Auch für den zentralen Begriff dieses Kapitels - den Inhalt eines einzelnen Bin
 Quelle ein eigenes Wort.
 Bei Jansen und Solis-Oba steht $\mathcal{C}$ für die Menge dieser Objekte, bei Gilmore und Gomory
 heißen sie \emph{Schnittmuster}.
-Hier wird stattdessen durchgehend die in Kapitel~\ref{chap:grundlagen} festgelegte Notation
+Hier wird stattdessen so weit wie möglich die in Kapitel~\ref{chap:grundlagen} festgelegte Notation
 verwendet: Instanz $\Gamma$, Kapazität $C$, Binzahlen $\mathrm{FFD}[\Gamma, C]$ und
 $\mathrm{OPT}[\Gamma, C]$.
 Das macht die drei Subroutinen ohne Übersetzungsschritt vergleichbar und erspart es, denselben
 Begriff mehrfach zu definieren.
+Zwei Zeichen werden in diesem Kapitel gleichwohl neu belegt: $p_1 > \cdots > p_d$ bezeichnet ab
+Abschnitt~\ref{sec:jansen} die \emph{verschiedenen} Aufgabengrößen statt der einzelnen Aufgaben,
+und $q$ steht in Definition~\ref{def:konfiguration} für die Anzahl der Konfigurationen, nicht für
+die Kapazität einer $q$-Packung aus Kapitel~\ref{chap:performanz}.
 
 \section{MFFD als Subroutine in MULTIFIT}
 \label{sec:mffd-subroutine}
@@ -124,7 +128,8 @@ Die Binärsuche trifft damit in jeder Iteration dieselbe Verzweigungsentscheidun
 Der Beweis nutzt von der oberen Intervallgrenze nichts und gilt daher für jede zulässige
 Wahl, etwa die hier verwendete Grenze $c_{\mathrm{high}}^{(0)} = \sum_j p_j/m + p_{\max}$ oder
 die ursprüngliche Grenze $\max(2\sum_j p_j/m,\, p_{\max})$ von \textcite{coffman1978}.
-Er überträgt sich außerdem auf die Variante mit ganzzahligen Kapazitäten:
+Er überträgt sich außerdem auf die Variante der Binärsuche, welche nur ganzzahlige Kapazitäten
+testet und in Abschnitt~\ref{sub:hm-aufbau} beschrieben wird:
 Sind alle $p_j$ ganzzahlig, so folgt aus $\rho(\Gamma) \ge 2$ auch
 $\lfloor \sum_j p_j/m \rfloor \ge \lfloor 2 p_{\max} \rfloor = 2 p_{\max}$,
 und alle getesteten Kapazitäten bleiben $\ge 2 p_{\max}$.
@@ -135,8 +140,11 @@ Sind die $p_j$ unabhängig gleichverteilt auf $[0, P]$, so ist $\mathbb{E}\!\lef
 \[
   \mathbb{E}[\rho(\Gamma)] \;\ge\; \frac{nP/2}{mP} \;=\; \frac{n}{2m}.
 \]
-Ab $n/m \ge 4$ ist demnach zu erwarten, dass $\rho(\Gamma) \ge 2$ gilt und beide Subroutinen dieselbe Ausgabe liefern.
-Das ist eine Aussage über den Erwartungswert und keine Garantie für die einzelne Instanz - Instanzen mit wenigen sehr großen und vielen sehr kleinen Aufgaben verletzen $\rho(\Gamma) \ge 2$ auch bei großem $n/m$.
+Ab $n/m \ge 4$ erreicht der Erwartungswert von $\rho(\Gamma)$ damit den Wert $2$.
+Daraus folgt allerdings weder, dass $\rho(\Gamma) \ge 2$ für eine einzelne Instanz gilt, noch
+dass es wahrscheinlich ist: Bei $n/m = 4$ ist die Schranke gerade $2$, und Instanzen mit wenigen
+sehr großen und vielen sehr kleinen Aufgaben verletzen $\rho(\Gamma) \ge 2$ auch bei großem
+$n/m$.
 Lemma~\ref{lem:kollaps} ist von der Größenverteilung dagegen unabhängig.
 
 Der Austausch von FFD gegen MFFD kann sich also nur auf Instanzen mit $\rho(\Gamma) < 2$
@@ -146,11 +154,16 @@ Lemma~\ref{lem:kollaps} allein die Phasen von MFFD benutzt.
 Damit ist zugleich gesagt, was Lemma~\ref{lem:kollaps} \emph{nicht} leistet.
 Die Bedingung $\rho(\Gamma) \ge 2$ beschreibt eine Klasse von Instanzen; auf ihr liefern beide
 Subroutinen dieselbe Ausgabe, über das Verhalten auf allen übrigen Instanzen folgt daraus nichts.
-Für die Schranke $13/11$ ist die Klasse ohne Belang, denn der bekannte Extremfall liegt außerhalb:
-Die Instanz von \textcite{friesen1984}, auf der MULTIFIT+FFD das Verhältnis $13/11$ annimmt, hat
-$\rho = 858/(13 \cdot 40) = 1{,}65 < 2$ (Abschnitt~\ref{sec:friesen}).
+Eine schärfere obere Schranke für MULTIFIT+MFFD folgt daraus nicht: Auf der Klasse stimmen beide
+Zuordnungen überein, dort gilt für MULTIFIT+MFFD also dieselbe Schranke wie für MULTIFIT+FFD,
+und außerhalb sagt das Lemma nichts.
+Wo die Instanz von \textcite{friesen1984} liegt, ist dagegen für die \emph{untere} Schranke
+von Belang: Sie hat $\rho = 858/(13 \cdot 40) = 1{,}65 < 2$ und liegt damit außerhalb der Klasse
+(Abschnitt~\ref{sec:friesen}).
+Läge sie innerhalb, so erzwänge sie das Verhältnis $13/11$ auch für MULTIFIT+MFFD; so aber bleibt
+offen, ob MULTIFIT+MFFD eine kleinere Schranke erfüllt.
 Das Lemma grenzt also ein, wo ein Unterschied zwischen den beiden Subroutinen überhaupt möglich
-ist; eine schärfere obere Schranke für MULTIFIT+MFFD folgt daraus nicht.
+ist.
 Wie groß der Anteil der Instanzen mit $\rho(\Gamma) < 2$ auf den Benchmark-Datensätzen ist und wie
 sich MFFD dort verhält, wird in Abschnitt~\ref{sec:kollaps-empirisch} untersucht.
 
@@ -161,7 +174,10 @@ sich MFFD dort verhält, wird in Abschnitt~\ref{sec:kollaps-empirisch} untersuch
 \textcite{jansen_solisoba2010} geben einen Algorithmus für das Cutting-Stock-Problem an, der bei $d$ verschiedenen Objektlängen - in der Notation dieser Arbeit: $d$ verschiedenen
 Aufgabengrößen - eine Packung in höchstens $\mathrm{OPT}+1$ Bins berechnet.
 Cutting Stock ist Bin Packing in der \emph{High-Multiplicity}-Darstellung: Statt $n$ einzelner Aufgaben werden $d$ verschiedene Größen $p_1 > p_2 > \cdots > p_d > 0$ mit Vielfachheiten $u_1, \ldots, u_d$ angegeben, wobei $\sum_{i=1}^{d} u_i = n$.
-Diese Darstellung wird in diesem Kapitel durchgehend verwendet; die Kapazität $C$ ist dabei ganzzahlig.
+Diese Darstellung wird in diesem Kapitel durchgehend verwendet.
+Die Implementierung und die Messungen in Abschnitt~\ref{sec:hm} arbeiten mit ganzzahligen
+Kapazitäten; die Aussagen dieses Abschnitts verlangen das nur dort, wo es ausdrücklich
+dabeisteht - Lemma~\ref{lem:jansen-dual} etwa kommt mit $C \ge p_{\max}$ aus.
 
 \begin{definition}[Konfiguration]
 \label{def:konfiguration}
@@ -284,6 +300,11 @@ $\varepsilon C$, und diese passen gemeinsam in einen einzigen zusätzlichen Bin;
 verwendet damit insgesamt höchstens $m^* + 1$ Bins \cite[Lemma~3.1]{jansen_solisoba2010}.
 Die Implementierung verteilt die Reste an dieser Stelle mit First Fit in absteigender Größe und
 legt nur das, was danach noch übrig ist, in den zusätzlichen Bin.
+Das Rundungsargument von \textcite{jansen_solisoba2010} ist für Next Fit geführt; mit
+$\mathrm{J}[\Gamma, C]$ ist im Folgenden deshalb stets die publizierte Fassung gemeint, für die
+die Schranke $\mathrm{OPT}[\Gamma, C] + 1$ bewiesen ist.
+Ob sie auch für die abweichende Verteilung gilt, ist hier nicht gezeigt;
+Abschnitt~\ref{sub:hm-garantien} prüft sie für die gemessene Implementierung empirisch nach.
 
 \subsection{Theoretische Anwendbarkeit als MULTIFIT-Subroutine}
 \label{sub:anwendbarkeit}
@@ -327,7 +348,8 @@ $\mathrm{J}[\Gamma, C] < \mathrm{J}[\Gamma, C+\delta]$ mit Differenz~$1$ eintret
 Der Grund liegt in Schritt~3: Die abgerundeten Werte $\lfloor x^+_{a} \rfloor$ hinterlassen kleine Aufgaben, die keiner Konfiguration zugeordnet wurden.
 Passen diese Restobjekte in die verbleibenden Bins,
 so wird kein Extrabin benötigt und $\mathrm{J}[\Gamma, C] = \mathrm{OPT}[\Gamma, C]$.
-Passen sie nicht, entsteht ein zusätzlicher Bin und $\mathrm{J}[\Gamma, C] = \mathrm{OPT}[\Gamma, C]+1$.
+Passen sie nicht, entsteht ein zusätzlicher Bin und $\mathrm{J}[\Gamma, C] = m^*+1$, wobei
+$m^* \le \mathrm{OPT}[\Gamma, C]$ ist.
 Nicht-Monotonie tritt auf, wenn dieser Übergang bei $C$ und $C+\delta$ unterschiedlich ausfällt,
 obwohl $\mathrm{OPT}[\Gamma, C] = \mathrm{OPT}[\Gamma, C+\delta]$: Werden die Restobjekte bei $C$ verteilt, bei $C+\delta$ jedoch nicht,
 so gilt $\mathrm{J}[\Gamma, C+\delta] = \mathrm{J}[\Gamma, C]+1 > \mathrm{J}[\Gamma, C]$.
@@ -352,9 +374,12 @@ insbesondere $C^{*}_{\max}(\Gamma) = C^{*}_{\max}(\Gamma, m)$ -, so trägt folge
 Für $C \ge C^{*}_{\max}(\Gamma, m-1)$ ist $\mathrm{OPT}[\Gamma, C] \le m-1$ nach
 Lemma~\ref{lem:dualitaet}, also $\mathrm{J}[\Gamma, C] \le m$ nach der $\mathrm{OPT}+1$-Garantie
 - solche Kapazitäten akzeptiert die Suche stets.
-Liegt $C^{*}_{\max}(\Gamma, m-1)$ im Startintervall, so ist die im Grenzwert $k \to \infty$
-resultierende Güte damit durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$ beschränkt;
-bei endlichem $k$ kommt der Term $2^{-k}$ hinzu.
+Liegt $C^{*}_{\max}(\Gamma, m-1)$ im Startintervall, so ist der im Grenzwert $k \to \infty$
+zurückgegebene Makespan damit durch $C^{*}_{\max}(\Gamma, m-1)$ beschränkt, das Verhältnis zum
+Optimum also durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$; bei endlichem $k$ kommt
+der Term $2^{-k}$ hinzu.
+Das ist eine Schranke je Instanz und keine Güte im Sinn von Definition~\ref{def:guete}, denn
+der Quotient ist über alle Instanzen nicht beschränkt.
 Bestimmt in beiden Fällen die Durchschnittslast das Optimum, gilt also
 $C^{*}_{\max}(\Gamma, m) \approx \sum_j p_j/m$ und
 $C^{*}_{\max}(\Gamma, m-1) \approx \sum_j p_j/(m-1)$, so ist
@@ -438,7 +463,9 @@ Schritte~1 und~2 sind identisch zum ursprünglichen Algorithmus.
 Schritt~3 ändert sich wie folgt:
 \begin{enumerate}[label=\arabic*.]
   \item Runde ab: $\bar{x}_{a} = \lfloor x^+_{a} \rfloor$ für alle Konfigurationen~$a$.
-  \item Weise jedem der $m^*$ Bins seine große Konfiguration und die abgerundeten kleinen Aufgaben zu.
+  \item Weise jedem der $m^*$ Bins seine große Konfiguration und die abgerundeten kleinen
+        Aufgaben zu. Wie im Original werden Aufgaben, die dabei öfter als $u_i$-mal abgedeckt
+        sind, im Nachhinein entfernt; jede Aufgabe liegt danach in höchstens einem Bin.
   \item Sammle die verbliebenen kleinen Aufgaben $L$ (nicht abgedeckt durch die gerundeten $\bar{x}$-Werte).
         Anders als im Original werden sie nicht vorab mit Next Fit verteilt; der Beweis von
         Lemma~\ref{lem:jansen-dual} braucht keine Schranke an $|L|$.
@@ -566,8 +593,9 @@ $O(k \log n)$ auf $O(k)$, wobei $k$ die Anzahl der MULTIFIT-Iterationen ist.
 Diese Verkürzung ist an die Modifikation gebunden und lässt sich nicht auf den unveränderten
 $\mathrm{OPT}+1$-Algorithmus übertragen.
 Dort entscheidet über die Annahme einer Kapazität der Wert $\mathrm{J}[\Gamma, C]$, und der ist
-$m^*$ oder $m^*+1$: Der zusätzliche Bin aus Schritt~3 wird genau dann geöffnet, wenn nach dem
-Abrunden der $x^+$-Werte kleine Aufgaben übrig bleiben.
+$m^*$ oder $m^*+1$: Der zusätzliche Bin aus Schritt~3 wird geöffnet, wenn nach dem Abrunden der
+$x^+$-Werte kleine Aufgaben übrig bleiben, die sich nicht mehr auf die vorhandenen Bins
+verteilen lassen.
 Ein einzelner Aufruf mit dem festen $m$ an Stelle von $m^*$ liefert in diesem Fall $m+1$ Bins
 und verwirft die Kapazität, obwohl das MILP für $m$ Bins lösbar war.
 Die Entscheidung hinge dann nicht mehr an der Lösbarkeit, sondern am Rundungsrest.
@@ -836,7 +864,7 @@ $c_{\mathrm{high}}^{(0)}$ bis zu $m + d - 1$ Bins zu.
 Wird jede getestete Kapazität abgelehnt, so gibt MULTIFIT keine Packung zurück; auf den
 Instanzen aus Abschnitt~\ref{sub:hm-guete} tritt dieser Fall nicht auf.
 
-Eine Gütegarantie für den Makespan überträgt sich daraus nicht.
+Eine Gütegarantie für den Makespan folgt daraus nicht unmittelbar.
 Die Makespan-Schranke $13/11 + 2^{-k}$ für MULTIFIT+FFD, die Theorem~\ref{thm:guete} mit
 $r_m \le 13/11$ nach \textcite{cao1995} liefert, beruht auf
 Implikation~\eqref{eq:ffd-akzeptiert}: Oberhalb von $r_m \cdot C^{*}_{\max}(\Gamma)$ kommt FFD
@@ -844,9 +872,18 @@ stets mit $m$ Bins aus, die Binärsuche akzeptiert dort also jede Kapazität und
 Intervallgrenze bis auf $r_m \cdot C^{*}_{\max}(\Gamma)$ absenken.
 Damit sich diese Schlussweise übertragen lässt, müsste eine Konstante $r$ existieren, sodass
 $C \ge r \cdot C^{*}_{\max}(\Gamma)$ stets $\mathrm{GG}[\Gamma, C] \le m$ nach sich zieht.
-Lemma~\ref{lem:gg-rundung} liefert für $C \ge C^{*}_{\max}(\Gamma)$ aber nur
-$\mathrm{GG}[\Gamma, C] \le m + d - 1$ und lässt damit gerade die $d-1$ Bins zu, die das
-Akzeptanzkriterium nicht mehr zulässt.
+Für $r = 1$ liefert Lemma~\ref{lem:gg-rundung} nur $\mathrm{GG}[\Gamma, C] \le m + d - 1$ und
+lässt damit gerade die $d-1$ Bins zu, die das Akzeptanzkriterium nicht mehr zulässt.
+Größere Werte von $r$ sind damit jedoch nicht ausgeschlossen.
+Sind $l_1, \ldots, l_m$ die Lasten einer optimalen Zuordnung, so trägt je ein Paar von ihnen
+zusammen höchstens $2\,C^{*}_{\max}(\Gamma)$; es gilt also
+$\mathrm{OPT}[\Gamma, C] \le \lceil m/2 \rceil$ für jedes $C \ge 2\,C^{*}_{\max}(\Gamma)$.
+Mit Lemma~\ref{lem:gg-rundung} folgt $\mathrm{GG}[\Gamma, C] \le \lceil m/2 \rceil + d - 1$
+und damit $\mathrm{GG}[\Gamma, C] \le m$, sobald $m \ge 2(d-1)$ gilt.
+Für Instanzen mit wenigen verschiedenen Größen und hinreichend vielen Maschinen trägt die
+Implikation also bereits mit $r = 2$.
+Eine von $d$ unabhängige Konstante liefert Lemma~\ref{lem:gg-rundung} dagegen nicht; ob es
+eine gibt, bleibt offen.
 Der additive Term hängt von der Anzahl verschiedener Aufgabengrößen ab und ist nur für kleines $d$
 klein - im Vergleich zur $\mathrm{OPT}+1$-Garantie von \textcite{jansen_solisoba2010} ist das
 die schwächere Aussage, erkauft mit einem erheblich einfacheren Verfahren.

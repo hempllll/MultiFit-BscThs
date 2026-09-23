@@ -28,9 +28,11 @@ wächst und der additive Term aus Lemma~\ref{lem:gg-rundung} gerade $d-1$ beträ
 Die fünf Benchmark-Datensätze bieten das nicht: Dort
 liegt $d$ im Median zwischen \HmDBenchMedianMin{} und \HmDBenchMedianMax{} und erreicht im
 Maximum \HmDBenchMax.
-Zudem testen sie nur ganzzahlige Kapazitäten, FFD und MFFD in Abschnitt~\ref{sec:greedy} dagegen
-reellwertige (Abschnitt~\ref{sub:hm-aufbau}).
-Beide Versuchsreihen verwenden deshalb verschiedene Datensätze und Parameter; jede beginnt mit
+Beide Reihen benutzen deshalb verschiedene Datensätze.
+Verschieden ist außerdem die Suche: Abschnitt~\ref{sub:hm-aufbau} testet nur ganzzahlige
+Kapazitäten, Abschnitt~\ref{sec:greedy} dagegen reellwertige, sodass auch die Laufzeiten nicht
+unmittelbar vergleichbar sind.
+Jede Reihe beginnt mit
 den Datensätzen und dem Versuchsaufbau und endet mit den Grenzen der jeweiligen Aussage.
 
 \section{FFD gegen MFFD}
@@ -289,7 +291,7 @@ Abbildung~\ref{fig:kollaps} stellt das Kriterium dem bisher verwendeten Verhält
 gegenüber.
 Auch oberhalb von $n/m = 12$ tritt keine Abweichung auf (\EvalNMZwoelf{} Instanzen); dieser
 Wert ist jedoch an den Daten abgelesen und nicht hergeleitet.
-Das $n/m$-Kriterium trennt zudem weniger scharf: Die größte Abweichung tritt bei
+Das $n/m$-Kriterium trennt zudem weniger scharf: Die Abweichung mit dem größten $n/m$ liegt bei
 $n/m = \EvalNMMaxAbw$ auf und damit deutlich oberhalb von $n/m = 4$, ab dem die
 Erwartungswertargumentation aus Abschnitt~\ref{sub:kollaps} einen Kollaps nahelegt.
 Bei $\rho$ liegt die größte beobachtete Abweichung dagegen bei $\rho = \EvalRhoMaxAbw$,
@@ -309,7 +311,7 @@ Tabelle~\ref{tab:kollaps} zeigt den Übergang.
 Der Anteil abweichender Instanzen erreicht sein Maximum mit \EvalKollapsMaxAnteil{} im Bereich
 \EvalKollapsMaxBereich{} und fällt unmittelbar unterhalb der Schwelle auf
 \EvalKollapsLetzterAnteil, oberhalb von $\rho = 2$ auf null.
-Die Schranke aus Lemma~\ref{lem:kollaps} ist auf diesen Datensätzen also nicht nur korrekt,
+Die Schwelle aus Lemma~\ref{lem:kollaps} ist auf diesen Datensätzen also nicht nur hinreichend,
 sondern wird auch fast erreicht.
 Auf den \EvalRhoUnterZwei{} Instanzen mit $\rho < 2$ ist ein Unterschied möglich; wie er
 ausfällt, behandelt der nächste Abschnitt.
@@ -582,7 +584,8 @@ das Akzeptanzkriterium $\mathrm{FFD}[\Gamma, C] \le m$ damit in beiden Fällen e
 
 Dass MULTIFIT+MFFD auf dieser Instanz besser abschneidet, sagt nichts über sein
 Worst-Case-Verhältnis aus.
-Ob $r_m(\mathrm{MF{+}MFFD}) < 13/11$ gilt, ist offen.
+Ob MULTIFIT+MFFD eine kleinere Schranke als MULTIFIT+FFD erfüllt, ist offen; $r_m$ ist nach
+Definition~\ref{def:rm} allein über FFD festgelegt.
 
 \subsection{Grenzen der Auswertung}
 \label{sec:grenzen}
@@ -644,7 +647,7 @@ Für den Vergleich wurden deshalb zwei Datensätze erzeugt.
 
 \paragraph{HM-Gitter.}
 Der erste Datensatz - HM steht für High Multiplicity - umfasst
-\HmInstanzen{} Instanzen aus einem vollständig balancierten Gitter:
+\HmInstanzen{} Instanzen aus einem im Entwurf vollständig balancierten Gitter:
 $d \in \{\HmDMin,\dots,\HmDMax\}$ verschiedene Aufgabengrößen, drei Szenarien für deren
 Verteilung, drei Maschinenzahlen zwischen \HmMMin{} und \HmMMax{} und drei Verhältnisse $n/m$
 mit je zehn Instanzen (Tabelle~\ref{tab:hm-datensatz}).
@@ -785,23 +788,24 @@ größten Verhältnisse liegen zwischen \HmMaxRatioOptjansendual{} und \HmMaxRat
 \end{figure}
 
 Die Spalten der vier nicht exakten Subroutinen sind dabei unterschiedlich zu lesen.
-Zwei von ihnen stehen je einer bewiesenen, instanzunabhängigen Schranke gegenüber: die Spalte zu
+Zwei von ihnen stehen je einer instanzunabhängigen Vergleichslinie gegenüber: die Spalte zu
 MULTIFIT+FFD dem Wert $13/11 + 2^{-k} \approx \HmSchrankeK$ nach \textcite{cao1995}, die
 Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ dem Wert $(1+\varepsilon)(1+2^{-k})$ aus
 Korollar~\ref{kor:multifit-jansen-dual}, wobei $\varepsilon = 1/(2d-1)$ hier zwischen
 \HmEpsTheorieMin{} und \HmEpsTheorieMax{} liegt.
-Gemessen wird dabei die Fassung ohne innere Binärsuche; für sie trägt das Argument am Ende von
-Abschnitt~\ref{sub:eps_dual}, nicht Korollar~\ref{kor:multifit-jansen-dual} selbst.
-Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} die Güte durch den
-Quotienten $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$, der im Allgemeinen bis
-zu $2$ betragen kann - eine Schranke, die von der Instanz abhängt.
-Für das Konfigurations-LP trägt dasselbe Argument mit $\mathrm{GG}[\Gamma,C] \le
-\mathrm{OPT}[\Gamma,C] + d - 1$ nur die schwächere Schranke
-$C^{*}_{\max}(\Gamma, m-d+1)/C^{*}_{\max}(\Gamma, m)$.
-Eine instanzunabhängige Schranke liefert Abschnitt~\ref{sub:gg-multifit} dagegen nicht: Die
-Schlussweise hinter der Schranke $13/11$ verlangt eine Konstante $r$, für die jede Kapazität
-$C \ge r \cdot C^{*}_{\max}(\Gamma)$ mit $m$ Bins auskommt
-(Implikation~\eqref{eq:ffd-akzeptiert}); Lemma~\ref{lem:gg-rundung} lässt dort $m + d - 1$ zu.
+Beide Werte sind für die reellwertige Halbierung bewiesen, nicht für die hier gemessene
+ganzzahlige Suche (Abschnitt~\ref{sub:hm-aufbau}); beim $\varepsilon$-dualen kommt hinzu, dass
+die Fassung ohne innere Binärsuche gemessen wird, für die das Argument am Ende von
+Abschnitt~\ref{sub:eps_dual} trägt und nicht Korollar~\ref{kor:multifit-jansen-dual} selbst.
+Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} das Verhältnis zum
+Optimum je Instanz durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$ - eine Schranke,
+die von der Instanz abhängt und deshalb keine Güte im Sinn von Definition~\ref{def:guete}
+liefert.
+Für das Konfigurations-LP zeigt Abschnitt~\ref{sub:gg-multifit}, dass
+Implikation~\eqref{eq:ffd-akzeptiert} mit $r = 2$ trägt, sobald $m \ge 2(d-1)$ gilt - auf dem
+HM-Gitter ist das für \HmGgRZweiAnteil{} der Instanzen der Fall.
+Eine von $d$ unabhängige Konstante liefert Lemma~\ref{lem:gg-rundung} dagegen nicht, und ob es
+eine gibt, ist offen.
 Für das Konfigurations-LP sind die gemessenen Werte damit die einzige verfügbare Aussage über
 das Verhältnis auf diesen Instanzen.
 
@@ -885,6 +889,10 @@ Abschnitt~\ref{sub:anwendbarkeit} zweideutig ist und deshalb konservativ als Abl
 wird.
 Beide Verfahren verwerfen also zulässige Kapazitäten, nur an verschiedenen Stellen - deshalb
 fällt der Vergleich in Tabelle~\ref{tab:hm-paare} in beide Richtungen aus.
+Für die Richtung, in der der $\mathrm{OPT}+1$-Algorithmus verliert, lässt sich das nachprüfen:
+Er verwirft auf \HmJansenFehlablehnungInstanzen{} Instanzen mindestens eine zulässige
+Kapazität, und alle \HmJansenVerlusteMitFehlablehnung{} Instanzen, auf denen MULTIFIT mit ihm
+den größeren Makespan liefert, gehören dazu; \HmJansenVerlusteOhne{} liegen außerhalb.
 Der $\varepsilon$-duale Algorithmus und das ganzzahlige Programm verwerfen dagegen keine
 einzige zulässige Kapazität (Spalte \emph{zu Unrecht} in Tabelle~\ref{tab:hm-akzeptanz}:
 \HmZuUnrechtJansendual{} und \HmZuUnrechtGgip).

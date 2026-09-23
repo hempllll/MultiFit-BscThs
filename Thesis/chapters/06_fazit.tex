@@ -44,10 +44,10 @@ Neben der Schranke für MULTIFIT+FFD ist sie die einzige instanzunabhängige Mak
 dieser Arbeit; für den $\mathrm{OPT}+1$-Algorithmus selbst gibt Abschnitt~\ref{sub:anwendbarkeit}
 eine von der Instanz abhängige Schranke an.
 
-Für das Konfigurations-LP von \textcite{gilmore_gomory1961} fällt das Ergebnis negativ aus.
-Lemma~\ref{lem:gg-rundung} lässt nach dem Runden $m + d - 1$ Bins zu und damit gerade die
-$d-1$ Bins, die das Akzeptanzkriterium nicht mehr zulässt;
-Implikation~\eqref{eq:ffd-akzeptiert} ist folglich nicht erfüllt.
+Für das Konfigurations-LP von \textcite{gilmore_gomory1961} fällt das Ergebnis schwächer aus.
+Lemma~\ref{lem:gg-rundung} lässt nach dem Runden $m + d - 1$ Bins zu und trägt
+Implikation~\eqref{eq:ffd-akzeptiert} damit nicht für $r = 1$; erst ab $m \ge 2(d-1)$ trägt sie
+mit $r = 2$, und eine von $d$ unabhängige Konstante liefert das Lemma nicht.
 Was das Verfahren stattdessen mitbringt, ist eine zertifizierte Ablehnung: Aus
 $\lceil \mathrm{LP}[\Gamma,C] \rceil > m$ folgt $C < C^{*}_{\max}(\Gamma)$, während FFD im
 entscheidenden Fall $\mathrm{FFD}[\Gamma,C] = m+1$ nichts über
@@ -70,9 +70,9 @@ Gegenüber der Grundlinie gewinnt MULTIFIT mit diesem Algorithmus dennoch nicht 
 Den Grund liefert Abschnitt~\ref{sub:hm-garantien}: FFD verwirft \HmZuUnrechtFfd{} Kapazitäten,
 für die eine Packung in $m$ Bins existiert, der $\mathrm{OPT}+1$-Algorithmus \HmZuUnrechtJansen{}
 - nur an anderen Stellen.
-Für den Makespan zählt demnach nicht, wie nah eine Subroutine an $\mathrm{OPT}[\Gamma,C]$
-herankommt, sondern welche Kapazitäten sie akzeptiert; genau an diese Entscheidung knüpft
-Implikation~\eqref{eq:ffd-akzeptiert} die Gütegarantie von MULTIFIT+FFD.
+Eine im Mittel bessere Binzahl schlägt also nicht auf den Makespan durch, sondern erst die
+Frage, bei welchen Kapazitäten die Binzahl die Schwelle $m$ unterschreitet; genau an diese
+Entscheidung knüpft Implikation~\eqref{eq:ffd-akzeptiert} die Gütegarantie von MULTIFIT+FFD.
 Die Entscheidung allein trägt den Makespan jedoch nicht: Der $\varepsilon$-duale Algorithmus
 akzeptiert nach Abschnitt~\ref{sub:hm-garantien} auf allen \HmEpsAkzeptanzInstanzen{} Instanzen
 dieselben Kapazitäten wie das exakte Konfigurationsprogramm und liefert auf
@@ -107,7 +107,9 @@ worden, und sämtliche Laufzeiten gelten für die beschriebene Implementierung u
 Die naheliegendste betrifft MFFD.
 Auf der Instanz von \textcite{friesen1984} liefert MULTIFIT+MFFD den kleineren Makespan
 (Abschnitt~\ref{sec:friesen}); über das Verhalten im schlechtesten Fall sagt das jedoch nichts,
-und ob $r_m(\mathrm{MF}{+}\mathrm{MFFD}) < 13/11$ gilt, bleibt offen.
+und ob MULTIFIT+MFFD eine kleinere Schranke als MULTIFIT+FFD erfüllt, bleibt offen -
+Definition~\ref{def:rm} legt $r_m$ allein über FFD fest, sodass die Frage für MFFD erst
+über eine eigene Fassung dieser Definition zu stellen wäre.
 Dahinter steht die allgemeinere Frage, für welche Subroutinen eine Entsprechung
 von~\eqref{eq:ffd-akzeptiert} überhaupt besteht: Für FFD ist sie bewiesen, für MFFD und für das
 Konfigurations-LP unbekannt - beim Konfigurations-LP reicht die Rundungsschranke aus

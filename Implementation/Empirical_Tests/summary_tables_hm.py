@@ -208,6 +208,31 @@ def overload_macros(df, t):
             "HmEpsUeberlastMax": num(factor.max(), 4)}
 
 
+def loss_cause_macros(df, t):
+    # Why does MULTIFIT+J lose against MULTIFIT+FFD on a few instances? The
+    # candidate cause is a capacity that J rejects although a packing into m bins
+    # exists (column "zu Unrecht" of tab_hm_akzeptanz). Counted per instance, not
+    # per call, so that the number can be compared with the win/loss table.
+    if "jansen" not in set(t.arm):
+        return {}
+    opt = df.set_index("instance_file").opt
+    rej = t[~t.accepted.astype(bool) & (t.arm == "jansen")].copy()
+    rej["opt"] = rej.instance_file.map(opt)
+    wrong = set(rej[rej.capacity >= rej.opt].instance_file)
+    lost = set(df[df.makespan_jansen > df.makespan_ffd].instance_file)
+    return {"HmJansenFehlablehnungInstanzen": num(len(wrong)),
+            "HmJansenVerlusteMitFehlablehnung": num(len(lost & wrong)),
+            "HmJansenVerlusteOhne": num(len(lost - wrong))}
+
+
+def gg_r_two_macros(df):
+    # Section 4.3.4 shows that implication (2.3) holds for the configuration LP
+    # with r = 2 as soon as m >= 2(d-1). How much of the grid does that cover?
+    ok = (df.m >= 2 * (df.d - 1)).mean()
+    return {"HmGgRZweiAnteil": pct(100 * ok, 1),
+            "HmGgRZweiInstanzen": num(int((df.m >= 2 * (df.d - 1)).sum()))}
+
+
 def degenerate_macros(df, arms):
     # The instances with rho < 1, which are excluded from the quality tables.
     # rho < 1 means p_max > sum p / m, so OPT >= p_max by Lemma 2.2. Whether the
@@ -501,6 +526,7 @@ def main():
         extra.update(non_monotonicity_witness(df, t))
         extra.update(rounding_macros(t))
         extra.update(overload_macros(df, t))
+        extra.update(loss_cause_macros(df, t))
         extra["HmJansenSchlechterFFD"] = num(int((df.makespan_jansen > df.makespan_ffd).sum()))
         extra["HmJansenBesserFFD"] = num(int((df.makespan_jansen < df.makespan_ffd).sum()))
         gg = t[t.arm == "gg_lp"]
@@ -553,6 +579,7 @@ def main():
             extra["HmLastFaktorMax"] = num(jd.last_faktor.max(), 4)
             extra["HmEpsPositiv"] = num(int((jd.achieved_eps > 0).sum()))
             extra["HmEpsAufrufe"] = num(len(jd))
+    extra.update(gg_r_two_macros(df))
     extra.update(degenerate_macros(df, arms))
     extra.update(d_benchmarks())
     extra.update(scale_d_budget())

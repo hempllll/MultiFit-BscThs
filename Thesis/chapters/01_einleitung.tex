@@ -49,7 +49,8 @@ Halbierungsschritten abgebrochen, wählt unter den akzeptierten Schranken die kl
 gibt deren Packung zurück.
 Die Güte von MULTIFIT hängt damit an einer rein kombinatorischen Größe, dem
 \emph{Grenzverhältnis} $r_m$: Übersteigt eine Kapazität den optimalen Makespan um mehr als den
-Faktor $r_m$, so kommt FFD mit $m$ Behältern aus (Definition~\ref{def:rm}).
+Faktor $r_m$, so kommt FFD mit $m$ Behältern aus; diese Folgerung aus
+Definition~\ref{def:rm} ist Implikation~\eqref{eq:ffd-akzeptiert}.
 Für diesen Wert weisen \textcite{coffman1978} zunächst $r_m \le 1{,}22$ nach.
 Über \textcite{friesen1984} und \textcite{yue1990} ist die Schranke später auf $13/11$ verschärft
 worden, und \textcite{cao1995} gibt dafür einen vollständigen Beweis;
@@ -109,8 +110,8 @@ vollständig aus und verbindet sie in Theorem~\ref{thm:guete} mit dem Makespan, 
 $k$ Suchschritten zurückgibt.
 Die schärfere Schranke $13/11$ wird eingeordnet und ihre Beweisidee dargestellt, nicht aber
 bewiesen; Caos Fallunterscheidung bleibt außerhalb des Umfangs dieser Arbeit.
-Die zugehörige untere Schranke wird dagegen geführt, denn eine Instanz von \textcite{friesen1984}
-belegt $r_m \ge 13/11$ für alle $m \ge 13$.
+Die zugehörige untere Schranke wird dagegen geführt: Eine Instanz von \textcite{friesen1984}
+belegt $r_{13} \ge 13/11$, und durch Auffüllen überträgt sich das auf jedes $m \ge 13$.
 
 Das zweite Ziel betrifft die Subroutine, denn innerhalb von MULTIFIT ist sie austauschbar.
 Kapitel~\ref{kap:alternative} untersucht drei Alternativen theoretisch.
