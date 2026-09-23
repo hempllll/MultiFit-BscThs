@@ -21,8 +21,11 @@ von \textcite{gilmore_gomory1961} und dasselbe Programm in ganzzahliger Fassung 
 Referenz.
 
 Die Trennung ist nicht bloß redaktionell.
-Die vier High-Multiplicity-Subroutinen setzen ein kleines, konstantes $d$ voraus
-(Abschnitt~\ref{sub:anwendbarkeit}), welches die fünf Benchmark-Datensätze nicht bieten: Dort
+Die vier High-Multiplicity-Subroutinen setzen ein kleines, konstantes $d$ voraus - beim
+$\mathrm{OPT}+1$-Algorithmus und seiner $\varepsilon$-dualen Variante wegen der Laufzeit
+(Abschnitt~\ref{sub:anwendbarkeit}), beim Konfigurations-LP, weil die Spaltenaufzählung mit $d$
+wächst und der additive Term aus Lemma~\ref{lem:gg-rundung} gerade $d-1$ beträgt.
+Die fünf Benchmark-Datensätze bieten das nicht: Dort
 liegt $d$ im Median zwischen \HmDBenchMedianMin{} und \HmDBenchMedianMax{} und erreicht im
 Maximum \HmDBenchMax.
 Zudem testen sie nur ganzzahlige Kapazitäten, FFD und MFFD in Abschnitt~\ref{sec:greedy} dagegen
@@ -279,12 +282,14 @@ Lemma~\ref{lem:kollaps} besagt: Aus $\rho(\Gamma) \ge 2$ folgt, dass MULTIFIT+FF
 MULTIFIT+MFFD dieselbe Partition erzeugen.
 Auf den Benchmark-Datensätzen erfüllen \EvalRhoZwei{} der \EvalInstanzen{} Instanzen
 (\EvalRhoZweiProzent) diese Bedingung.
-In keiner davon unterscheiden sich die gemessenen Makespans, was das Lemma bestätigt.
+In keiner davon unterscheiden sich die gemessenen Makespans, wie es Lemma~\ref{lem:kollaps}
+verlangt.
 
 Abbildung~\ref{fig:kollaps} stellt das Kriterium dem bisher verwendeten Verhältnis $n/m$
 gegenüber.
-Auch oberhalb von $n/m = 12$ tritt keine Abweichung auf (\EvalNMZwoelf{} Instanzen).
-Das $n/m$-Kriterium trennt jedoch weniger scharf: Die größte Abweichung tritt bei
+Auch oberhalb von $n/m = 12$ tritt keine Abweichung auf (\EvalNMZwoelf{} Instanzen); dieser
+Wert ist jedoch an den Daten abgelesen und nicht hergeleitet.
+Das $n/m$-Kriterium trennt zudem weniger scharf: Die größte Abweichung tritt bei
 $n/m = \EvalNMMaxAbw$ auf und damit deutlich oberhalb von $n/m = 4$, ab dem die
 Erwartungswertargumentation aus Abschnitt~\ref{sub:kollaps} einen Kollaps nahelegt.
 Bei $\rho$ liegt die größte beobachtete Abweichung dagegen bei $\rho = \EvalRhoMaxAbw$,
@@ -423,7 +428,8 @@ MFFDs zusätzliche Klassifikation kostet Laufzeit.
 Der Median des instanzweisen Verhältnisses $t_{\mathrm{MFFD}}/t_{\mathrm{FFD}}$
 liegt je nach Datensatz zwischen \EvalZeitMedianMin{} und
 \EvalZeitMedianMax{} (Tabelle~\ref{tab:laufzeit}, Abbildung~\ref{fig:laufzeit} links).
-Der Mehraufwand ist damit messbar, bleibt aber ein konstanter Faktor.
+Der Mehraufwand ist damit messbar, bleibt auf diesen Datensätzen aber in derselben
+Größenordnung.
 
 \begin{table}[htbp]
 \centering
@@ -690,8 +696,10 @@ Alle \HmInstanzen{} Werte sind auf diesem Weg als optimal nachgewiesen.
 größte Aufgabe also die mittlere Maschinenlast; bei \HmDegOptPMax{} von ihnen ist
 $C^{*}_{\max}(\Gamma) = p_{\max}$, die untere Schranke aus Lemma~\ref{lem:untere-schranken} wird
 dort angenommen.
-Auf diesen Instanzen erreichen \HmDegAlleOptimal{} fünf Subroutinen den optimalen Makespan; sie
-trennen die Verfahren nicht und bleiben in den Gütevergleichen unberücksichtigt.
+Auf allen \HmDegeneriert{} erreichen \HmDegAlleOptimal{} fünf Subroutinen den optimalen
+Makespan; sie trennen die Verfahren nicht und bleiben in den Gütevergleichen unberücksichtigt.
+Tabelle~\ref{tab:hm-ratio-opt} beruht deshalb auf den übrigen Instanzen, während der
+Makespan-Vergleich in Tabelle~\ref{tab:hm-paare} alle \HmInstanzen{} umfasst.
 
 \subsection{Versuchsaufbau}
 \label{sub:hm-aufbau}
@@ -727,6 +735,9 @@ daher dieselben Packungen zu wie $\lfloor C \rfloor$.
 Die Binärsuche testet deshalb nur ganze Zahlen, setzt nach einer Ablehnung von $C$ die untere
 Grenze auf $C+1$ und endet, sobald sich untere und obere Grenze treffen.
 So prüft jeder Aufruf der Subroutine eine andere Kapazität.
+Theorem~\ref{thm:guete} und Korollar~\ref{kor:multifit-jansen-dual} sind für die Halbierung mit
+reellen Kapazitäten aus Abschnitt~\ref{sec:multifit} bewiesen, nicht für diese Variante; die
+beiden Schranken dienen in Abschnitt~\ref{sub:hm-garantien} deshalb als Vergleichslinien.
 FFD wird deshalb in dieser Variante neu gemessen und nicht aus Abschnitt~\ref{sec:laufzeit}
 übernommen.
 Jede Instanz wird von allen fünf Subroutinen im selben Prozess bearbeitet.
@@ -774,11 +785,13 @@ größten Verhältnisse liegen zwischen \HmMaxRatioOptjansendual{} und \HmMaxRat
 \end{figure}
 
 Die Spalten der vier nicht exakten Subroutinen sind dabei unterschiedlich zu lesen.
-Zwei von ihnen prüfen je eine bewiesene, instanzunabhängige Schranke nach: die Spalte zu
-MULTIFIT+FFD den Wert $13/11 + 2^{-k} \approx \HmSchrankeK$ nach \textcite{cao1995}, die
-Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ den Wert $(1+\varepsilon)(1+2^{-k})$ nach
+Zwei von ihnen stehen je einer bewiesenen, instanzunabhängigen Schranke gegenüber: die Spalte zu
+MULTIFIT+FFD dem Wert $13/11 + 2^{-k} \approx \HmSchrankeK$ nach \textcite{cao1995}, die
+Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ dem Wert $(1+\varepsilon)(1+2^{-k})$ aus
 Korollar~\ref{kor:multifit-jansen-dual}, wobei $\varepsilon = 1/(2d-1)$ hier zwischen
 \HmEpsTheorieMin{} und \HmEpsTheorieMax{} liegt.
+Gemessen wird dabei die Fassung ohne innere Binärsuche; für sie trägt das Argument am Ende von
+Abschnitt~\ref{sub:eps_dual}, nicht Korollar~\ref{kor:multifit-jansen-dual} selbst.
 Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} die Güte durch den
 Quotienten $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$, der im Allgemeinen bis
 zu $2$ betragen kann - eine Schranke, die von der Instanz abhängt.
@@ -820,15 +833,18 @@ Abschnitt~\ref{sub:hm-garantien}.
 
 Weil GG-IP $\mathrm{OPT}[\Gamma, C]$ bei jeder getesteten Kapazität liefert, lassen sich
 die Schranken aus Kapitel~\ref{kap:alternative} unmittelbar nachrechnen.
+Verglichen werden kann jedoch nur, wo beide Verfahren dieselbe Kapazität getestet haben; die
+Binärsuche läuft je Subroutine verschieden, sodass die Grundmenge kleiner ausfällt als die
+Spalte \emph{Aufrufe} in Tabelle~\ref{tab:hm-akzeptanz}.
 
-Für den $\mathrm{OPT}+1$-Algorithmus gilt in allen \HmJansenVergleiche{} verglichenen Aufrufen
+Für den $\mathrm{OPT}+1$-Algorithmus gilt in allen \HmJansenVergleiche{} so verglichenen Aufrufen
 $\mathrm{J}[\Gamma,C] - \mathrm{OPT}[\Gamma,C] \in \{0,1\}$, wie es
 \textcite{jansen_solisoba2010} garantiert; der Wert 1 tritt in \HmJansenPlusEins{} Fällen auf
 (\HmJansenUeberOpt), sonst ist die Packung optimal.
 
 Für das Konfigurations-LP erlaubt Lemma~\ref{lem:gg-rundung} den additiven Term $d-1$, hier also
 bis zu \HmDMinusEins.
-Gemessen wird er nicht annähernd erreicht: Über \HmGGVergleiche{} Aufrufe ist
+Gemessen wird er nicht annähernd erreicht: Über \HmGGVergleiche{} vergleichbare Aufrufe ist
 $\mathrm{GG}[\Gamma,C] - \mathrm{OPT}[\Gamma,C]$ höchstens \HmGGMaxUeberOpt{} und in
 \HmGGPlusEins{} Fällen überhaupt von null verschieden.
 Auch der Abstand zur LP-Schranke bleibt klein: In \HmGGOhneVerlust{} der Aufrufe gilt
@@ -840,7 +856,7 @@ ausgeschöpft.
 Die Zahl der fraktionalen Spalten erreicht im Maximum \HmFMax{} und ist in \HmFGleichD{} der
 Aufrufe gleich $d$, im Median beträgt sie \HmFMedian.
 Klein bleibt der Verlust vielmehr durch die Rundung selbst.
-Variante B aus Abschnitt~\ref{sub:gg-rundung} packt den Restbedarf nicht mit einem Bin je
+Schritt~3 aus Abschnitt~\ref{sub:gg-rundung} packt den Restbedarf nicht mit einem Bin je
 fraktionaler Spalte, sondern nimmt die kleinere der beiden dort beschriebenen Packungen:
 In \HmRestAufrufe{} Aufrufen bleibt überhaupt ein Rest; er kostet im Median
 \HmRestBinsMedian{} und höchstens \HmRestBinsMax{} Bins und bleibt in \HmRestUnterFAnteil{} der
@@ -852,9 +868,11 @@ bessere.
 
 Der $\varepsilon$-duale Algorithmus soll eine Last von höchstens $(1+\varepsilon)C$ zulassen, mit
 $\varepsilon = 1/(2d-1)$, hier also zwischen \HmEpsTheorieMin{} und \HmEpsTheorieMax.
-Ausgeschöpft wird das nicht: Über \HmEpsAufrufe{} Aufrufe überschreitet nur in \HmEpsPositiv{}
-Fällen überhaupt ein Bin die Kapazität $C$, und der größte gemessene Wert ist
-$\varepsilon = \HmEpsMax$, entsprechend einer Last von höchstens $\HmLastFaktorMax \cdot C$.
+Ausgeschöpft wird das nicht: Über die \HmEpsAufrufe{} Aufrufe, bei denen das Programm lösbar
+war und eine Packung entstand, überschreitet nur in \HmEpsPositiv{} Fällen überhaupt ein Bin
+die Kapazität $C$.
+Die größte gemessene Überschreitung beträgt \HmEpsMax{} und entspricht einer Last von höchstens
+$\HmLastFaktorMax \cdot C$.
 
 \paragraph{Was MULTIFIT davon merkt.}
 Für die Binärsuche zählt nicht die Packung, sondern die Entscheidung über die Kapazität.

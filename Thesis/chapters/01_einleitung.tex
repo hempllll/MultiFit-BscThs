@@ -74,8 +74,9 @@ Verbessert worden ist MULTIFIT auch, ohne die Subroutine anzutasten.
 \textcite{friesen_langston1986} ersetzen den Zweig, welcher eine Kapazität verwirft, durch eine
 Reparatur: Eine beschränkte Zahl besonders ungünstig belegter Maschinen wird zusammen mit den
 dabei übrig gebliebenen Aufgaben optimal neu belegt.
-Das Verhältnis von erzeugtem zu optimalem Makespan sinkt dadurch auf $72/61$ - asymptotisch
-scharf und damit unter $13/11$ -, während die Laufzeitordnung $O(n \log n)$ erhalten bleibt.
+Das Verhältnis von erzeugtem zu optimalem Makespan sinkt dadurch auf $72/61$ und liegt damit
+unter $13/11$; asymptotisch ist dieser Wert scharf, und die Laufzeitordnung $O(n \log n)$
+bleibt erhalten.
 Diese Arbeit geht den anderen Weg und lässt die Suche unangetastet.
 
 Welche Subroutine dort steht, ist ein eigener Strang der Literatur.
@@ -130,8 +131,9 @@ Was der Austausch praktisch bewirkt, misst Kapitel~\ref{chap:evaluation} in zwei
 Die erste vergleicht FFD und MFFD auf \EvalInstanzen{} Instanzen aus fünf publizierten
 Benchmark-Datensätzen, die zweite vier Subroutinen für Instanzen mit wenigen verschiedenen
 Aufgabengrößen auf \HmInstanzen{} eigens erzeugten Instanzen.
-Kein gemessenes Verhältnis überschreitet dabei $13/11$ - für MULTIFIT+FFD ist das die bewiesene
-Schranke, für die übrigen Kombinationen lediglich eine Vergleichslinie.
+Kein gemessenes Verhältnis überschreitet dabei $13/11$ - für MULTIFIT+FFD liegt dieser Wert
+knapp unter der bewiesenen Schranke $13/11 + 2^{-k}$, für die übrigen Kombinationen ist er
+lediglich eine Vergleichslinie.
 Zugleich zeigen beide Reihen, dass aus einer schärferen Bin-Packing-Garantie kein kleinerer
 Makespan folgt.
 

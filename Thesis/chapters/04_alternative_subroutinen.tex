@@ -139,7 +139,9 @@ Ab $n/m \ge 4$ ist demnach zu erwarten, dass $\rho(\Gamma) \ge 2$ gilt und beide
 Das ist eine Aussage über den Erwartungswert und keine Garantie für die einzelne Instanz - Instanzen mit wenigen sehr großen und vielen sehr kleinen Aufgaben verletzen $\rho(\Gamma) \ge 2$ auch bei großem $n/m$.
 Lemma~\ref{lem:kollaps} ist von der Größenverteilung dagegen unabhängig.
 
-Der Austausch der Subroutine kann sich also nur auf Instanzen mit $\rho(\Gamma) < 2$ auswirken.
+Der Austausch von FFD gegen MFFD kann sich also nur auf Instanzen mit $\rho(\Gamma) < 2$
+auswirken; für die Subroutinen der folgenden Abschnitte gilt das nicht, da
+Lemma~\ref{lem:kollaps} allein die Phasen von MFFD benutzt.
 
 Damit ist zugleich gesagt, was Lemma~\ref{lem:kollaps} \emph{nicht} leistet.
 Die Bedingung $\rho(\Gamma) \ge 2$ beschreibt eine Klasse von Instanzen; auf ihr liefern beide
@@ -201,7 +203,8 @@ Gurobi bietet keine polynomielle Worst-Case-Garantie, ist für die hier auftrete
 MILP-Größen aber praktikabel; die gemessenen Laufzeiten stehen in
 Abschnitt~\ref{sub:hm-laufzeit}.
 
-Im Originalalgorithmus wird über alle Teilmengen $S^B \subseteq \mathcal{K}^B$ der Größe $2^d$ iteriert,
+Im Originalalgorithmus wird über alle Teilmengen der Größe $2^d$ der weiter unten in Schritt~1
+eingeführten Menge $\mathcal{K}^B$ aller großen Konfigurationen iteriert,
 da Lenstras Algorithmus eine feste obere Schranke an die Anzahl ganzzahliger Variablen voraussetzt
 \cite{jansen_solisoba2010}.
 Dass solche Teilmengen genügen, folgt aus einem Ergebnis von \textcite{eisenbrand_shmonin2006}
@@ -416,7 +419,8 @@ Diese Prozedur ist strukturell identisch mit MULTIFITs Binärsuche.
   \]
 \end{theorem}
 
-Für $k \to \infty$ konvergiert die Güte gegen $(1+\varepsilon)\cdot C^{*}_{\max}(\Gamma)$.
+Für $k \to \infty$ konvergiert die Schranke gegen $(1+\varepsilon)\cdot C^{*}_{\max}(\Gamma)$,
+die Güte also gegen $1+\varepsilon$.
 Die Konstruktion eines $\varepsilon$-dualen Bin-Packing-Algorithmus ist damit der entscheidende Baustein.
 
 \subsubsection{Jansen-Dual: Modifikation des Rundungsschritts}
@@ -801,9 +805,10 @@ Deshalb wird hier abgerundet.
 Als Subroutine erhält das Verfahren dieselbe Schnittstelle wie FFD und MFFD: Eingabe sind die
 Aufgaben von $\Gamma$ und eine Kapazität $C$, Ausgabe ist eine Packung.
 MULTIFIT akzeptiert $C$ genau dann, wenn $\mathrm{GG}[\Gamma, C] \le m$ gilt.
-Da die Aufgabengrößen ganzzahlig sind, lässt eine Kapazität $C$ dieselben Packungen zu wie
-$\lfloor C \rfloor$; verwendet wird deshalb die Variante der Binärsuche mit ganzzahligen
-Kapazitäten (Abschnitt~\ref{sub:hm-aufbau}).
+Sind die Aufgabengrößen ganzzahlig - wie auf den Instanzen aus Abschnitt~\ref{sub:hm-datensaetze} -,
+so lässt eine Kapazität $C$ dieselben Packungen zu wie $\lfloor C \rfloor$; verwendet wird
+dort deshalb die Variante der Binärsuche mit ganzzahligen Kapazitäten
+(Abschnitt~\ref{sub:hm-aufbau}).
 
 Gegenüber FFD ändert sich die Bedeutung einer Ablehnung.
 Wegen $\lceil \mathrm{LP}[\Gamma, C] \rceil \le \mathrm{OPT}[\Gamma, C] \le \mathrm{GG}[\Gamma, C]$
@@ -824,6 +829,12 @@ zerfällt der Fall $\mathrm{GG}[\Gamma, C] > m$ in zwei Teile:
 \end{itemize}
 Die Differenz $\mathrm{GG}[\Gamma, C] - \lceil \mathrm{LP}[\Gamma, C] \rceil$ misst damit genau
 den Verlust, den die Rundung gegenüber der LP-Schranke verursacht.
+
+Anders als bei FFD ist damit nicht gesichert, dass überhaupt eine Packung gespeichert wird:
+Lemma~\ref{lem:startintervall}(b) gilt für FFD, und Lemma~\ref{lem:gg-rundung} lässt auch bei
+$c_{\mathrm{high}}^{(0)}$ bis zu $m + d - 1$ Bins zu.
+Wird jede getestete Kapazität abgelehnt, so gibt MULTIFIT keine Packung zurück; auf den
+Instanzen aus Abschnitt~\ref{sub:hm-guete} tritt dieser Fall nicht auf.
 
 Eine Gütegarantie für den Makespan überträgt sich daraus nicht.
 Die Makespan-Schranke $13/11 + 2^{-k}$ für MULTIFIT+FFD, die Theorem~\ref{thm:guete} mit
