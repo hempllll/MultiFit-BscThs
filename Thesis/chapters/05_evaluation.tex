@@ -747,9 +747,14 @@ daher dieselben Packungen zu wie $\lfloor C \rfloor$.
 Die Binärsuche testet deshalb nur ganze Zahlen, setzt nach einer Ablehnung von $C$ die untere
 Grenze auf $C+1$ und endet, sobald sich untere und obere Grenze treffen.
 So prüft jeder Aufruf der Subroutine eine andere Kapazität.
-Theorem~\ref{thm:guete} und Korollar~\ref{kor:multifit-jansen-dual} sind für die Halbierung mit
-reellen Kapazitäten aus Abschnitt~\ref{sec:multifit} bewiesen, nicht für diese Variante; die
-beiden Schranken dienen in Abschnitt~\ref{sub:hm-guete} deshalb als Vergleichslinien.
+Theorem~\ref{thm:guete} überträgt sich auf diese Variante: Bei ganzzahligen Größen ist jede
+Binlast ganzzahlig, also trifft FFD bei jedem $C' \in [C, C+1)$ dieselben Entscheidungen wie
+bei $C$. Wird $C$ verworfen, so gilt nach~\eqref{eq:ffd-akzeptiert}
+$C' \le r_m \cdot C^{*}_{\max}(\Gamma)$ für alle diese $C'$, im Supremum also
+$C+1 \le r_m \cdot C^{*}_{\max}(\Gamma)$ - die Invariante überlebt das Setzen von
+$c_{\mathrm{low}} := C+1$. Da sich die Intervallbreite in beiden Zweigen mindestens halbiert,
+trägt auch der Term $2^{-k}$.
+Für Korollar~\ref{kor:multifit-jansen-dual} ist das nicht geführt.
 FFD wird deshalb in dieser Variante neu gemessen und nicht aus Abschnitt~\ref{sec:laufzeit}
 übernommen.
 Jede Instanz wird von allen fünf Subroutinen im selben Prozess bearbeitet.
@@ -797,15 +802,15 @@ größten Verhältnisse liegen zwischen \HmMaxRatioOptjansendual{} und \HmMaxRat
 \end{figure}
 
 Die Spalten der vier nicht exakten Subroutinen sind dabei unterschiedlich zu lesen.
-Zwei von ihnen stehen je einer Vergleichslinie gegenüber: die Spalte zu
-MULTIFIT+FFD dem Wert $13/11 + 2^{-k} \approx \HmSchrankeK$ nach \textcite{cao1995}, die
-Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ dem Wert $(1+\varepsilon)(1+2^{-k})$ aus
-Korollar~\ref{kor:multifit-jansen-dual}, wobei $\varepsilon = 1/(2d-1)$ hier zwischen
+Die Spalte zu MULTIFIT+FFD steht der bewiesenen Schranke $13/11 + 2^{-k} \approx \HmSchrankeK$
+nach \textcite{cao1995} gegenüber; sie gilt nach Abschnitt~\ref{sub:hm-aufbau} auch für die
+hier gemessene ganzzahlige Suche.
+Die Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ steht dem Wert $(1+\varepsilon)(1+2^{-k})$ aus
+Korollar~\ref{kor:multifit-jansen-dual} gegenüber, wobei $\varepsilon = 1/(2d-1)$ hier zwischen
 \HmEpsTheorieMin{} und \HmEpsTheorieMax{} liegt.
-Beide Werte sind für die reellwertige Halbierung bewiesen, nicht für die hier gemessene
-ganzzahlige Suche (Abschnitt~\ref{sub:hm-aufbau}); beim $\varepsilon$-dualen kommt hinzu, dass
-die Fassung ohne innere Binärsuche gemessen wird, für die das Argument am Ende von
-Abschnitt~\ref{sub:eps_dual} trägt und nicht Korollar~\ref{kor:multifit-jansen-dual} selbst.
+Dieser Wert ist nur eine Vergleichslinie: Gemessen wird die Fassung ohne innere Binärsuche,
+für die das Argument am Ende von Abschnitt~\ref{sub:eps_dual} trägt und nicht
+Korollar~\ref{kor:multifit-jansen-dual} selbst.
 Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} das Verhältnis zum
 Optimum je Instanz durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$; über alle
 Instanzen genommen ergibt das nur den Wert~$2$ und damit keine mit $13/11$ vergleichbare
@@ -813,8 +818,8 @@ Aussage.
 Für das Konfigurations-LP zeigt Abschnitt~\ref{sub:gg-multifit}, dass
 Implikation~\eqref{eq:ffd-akzeptiert} mit $r = 2$ trägt, sobald $m \ge 2(d-1)$ gilt - auf dem
 HM-Gitter ist das für \HmGgRZweiAnteil{} der Instanzen der Fall.
-Eine von $d$ unabhängige Konstante liefert Lemma~\ref{lem:gg-rundung} dagegen nicht, und ob es
-eine gibt, ist offen.
+Eine Schranke gewinnt man daraus nicht, denn das Startintervall hält den Faktor~$2$ ohnehin
+ein; ob eine von $d$ unabhängige Konstante $r < 2$ existiert, ist offen.
 Für das Konfigurations-LP sind die gemessenen Werte damit die einzige verfügbare Aussage über
 das Verhältnis auf diesen Instanzen.
 
@@ -851,9 +856,11 @@ Binärsuche läuft je Subroutine verschieden, sodass die Grundmenge kleiner ausf
 Spalte \emph{Aufrufe} in Tabelle~\ref{tab:hm-akzeptanz}.
 
 Für den $\mathrm{OPT}+1$-Algorithmus gilt in allen \HmJansenVergleiche{} so verglichenen Aufrufen
-$\mathrm{J}[\Gamma,C] - \mathrm{OPT}[\Gamma,C] \in \{0,1\}$, wie es
-\textcite{jansen_solisoba2010} garantiert; der Wert 1 tritt in \HmJansenPlusEins{} Fällen auf
-(\HmJansenUeberOpt), sonst ist die Packung optimal.
+$\mathrm{J}[\Gamma,C] - \mathrm{OPT}[\Gamma,C] \in \{0,1\}$; der Wert 1 tritt in
+\HmJansenPlusEins{} Fällen auf (\HmJansenUeberOpt), sonst ist die Packung optimal.
+Bewiesen ist diese Schranke für die publizierte Fassung; die Implementierung weicht nach
+Abschnitt~\ref{sub:jansen-implementierung} im Verteilen der Reste von ihr ab und hält sie
+in jedem gemessenen Aufruf ebenfalls ein.
 
 Für das Konfigurations-LP erlaubt Lemma~\ref{lem:gg-rundung} den additiven Term $d-1$, hier also
 bis zu \HmDMinusEins.
@@ -893,9 +900,9 @@ Tabelle~\ref{tab:hm-akzeptanz} stellt sie den exakten Werten gegenüber; die let
 die Erklärung für den Befund aus Abschnitt~\ref{sub:hm-guete}.
 FFD verwirft \HmZuUnrechtFfd{} Kapazitäten, für die eine Packung in $m$ Bins existiert, der
 $\mathrm{OPT}+1$-Algorithmus \HmZuUnrechtJansen.
-Jede dieser \HmZuUnrechtJansen{} Ablehnungen ist der Fall $\mathrm{J}[\Gamma,C] = m+1$, der nach
-Abschnitt~\ref{sub:anwendbarkeit} zweideutig ist und deshalb konservativ als Ablehnung behandelt
-wird.
+Jede dieser \HmZuUnrechtJansen{} Ablehnungen tritt gemessen bei $\mathrm{J}[\Gamma,C] = m+1$
+auf - dem Fall, der nach Abschnitt~\ref{sub:anwendbarkeit} zweideutig ist und deshalb
+konservativ als Ablehnung behandelt wird.
 Beide Verfahren verwerfen also zulässige Kapazitäten, nur an verschiedenen Stellen - deshalb
 fällt der Vergleich in Tabelle~\ref{tab:hm-paare} in beide Richtungen aus.
 Für die Richtung, in der der $\mathrm{OPT}+1$-Algorithmus verliert, lässt sich das nachprüfen:

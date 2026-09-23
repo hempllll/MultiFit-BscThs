@@ -311,7 +311,7 @@ Abschnitt~\ref{sub:hm-garantien} prüft sie für die gemessene Implementierung e
 
 Die äußere Binärsuche in MULTIFIT akzeptiert $C$ genau dann, wenn $\mathrm{J}[\Gamma, C] \le m$.
 Wie schon $\mathrm{FFD}[\Gamma, \cdot\,]$ (Bemerkung~\ref{bem:nicht-monoton}) kann auch
-$\mathrm{J}[\Gamma, \cdot\,]$ nicht monoton fallen; ein Zeuge dafür wird in
+$\mathrm{J}[\Gamma, \cdot\,]$ nicht monoton fallen; ein Zeuge dafür wird an der Implementierung in
 Abschnitt~\ref{sub:hm-garantien} gemessen.
 Anders als bei FFD lässt sich die Abweichung hier jedoch beziffern.
 
@@ -476,9 +476,8 @@ Schritt~3 ändert sich wie folgt:
 
 \begin{lemma}[Jansen-Dual ist $\varepsilon$-dual für $\varepsilon = 1/(2d-1)$]
 \label{lem:jansen-dual}
-  Sei $\Gamma$ eine Instanz mit $d$~verschiedenen Größen, $C \ge p_{\max}$ eine Kapazität
-  und $\varepsilon = 1/(2d-1)$; $d$ sei konstant, sodass die Laufzeit nach
-  Abschnitt~\ref{sub:jansen-laufzeit} polynomiell ist.
+  Sei $\Gamma$ eine Instanz mit $n$ Aufgaben in $d$~verschiedenen Größen, $C \ge p_{\max}$
+  eine Kapazität und $\varepsilon = 1/(2d-1)$; $d$ sei konstant.
   Jansen-Dual berechnet eine Packung aller Aufgaben von~$\Gamma$, für die gilt:
   \begin{enumerate}[label=(\roman*)]
     \item die Anzahl der verwendeten Bins beträgt höchstens $\mathrm{OPT}[\Gamma, C]$;
@@ -536,6 +535,13 @@ folgte - im Widerspruch zur soeben gezeigten Ungleichung.
 
 Also findet Schritt~3.4 stets einen Bin mit aktueller Last $< C$;
 nach dem Einfügen von~$s$ ist die Last dieses Bins kleiner als $C + \varepsilon C = (1+\varepsilon)\, C$.
+
+\textit{Laufzeit.}\; Die Größe des MILP aus Schritt~2 hängt für festes~$d$ nach
+Abschnitt~\ref{sub:jansen-laufzeit} allein von~$d$ ab; Schritt~3.4 platziert dagegen jede
+Aufgabe aus~$L$ einzeln und kostet mit einem Zeiger über die Bins $O(|L| + m^{*})$ Schritte mit
+$|L| \le n$, sodass die Laufzeit polynomiell in~$n$ ist.
+Bei \textcite{jansen_solisoba2010} erlaubt die Schranke $|L| \le 2d-1$ eine von~$n$ unabhängige
+Restbehandlung; für Korollar~\ref{kor:multifit-jansen-dual} ist der Unterschied ohne Belang.
 
 Alle Aufgaben von~$\Gamma$ werden gepackt: große und abgerundete kleine Aufgaben durch Schritt~3.2,
 die verbliebenen kleinen Aufgaben aus~$L$ durch Schritt~3.4.
@@ -885,8 +891,12 @@ Mit Lemma~\ref{lem:gg-rundung} folgt $\mathrm{GG}[\Gamma, C] \le \lceil m/2 \rce
 und damit $\mathrm{GG}[\Gamma, C] \le m$, sobald $m \ge 2(d-1)$ gilt.
 Für Instanzen mit wenigen verschiedenen Größen und hinreichend vielen Maschinen trägt die
 Implikation also bereits mit $r = 2$.
-Eine von $d$ unabhängige Konstante liefert Lemma~\ref{lem:gg-rundung} dagegen nicht; ob es
-eine gibt, bleibt offen.
+Ein Gewinn ist das allerdings nicht: Nach Lemma~\ref{lem:untere-schranken} gilt
+$c_{\mathrm{high}}^{(0)} = \sum_j p_j/m + p_{\max} \le 2\,C^{*}_{\max}(\Gamma)$, sodass schon
+das Startintervall den Faktor~$2$ einhält.
+Der Fall $r = 2$ zeigt daher nur, dass Lemma~\ref{lem:gg-rundung} die Schlussweise nicht
+widerlegt; eine Schranke unterhalb von~$2$ liefert er nicht.
+Ob eine von $d$ unabhängige Konstante $r < 2$ existiert, bleibt offen.
 Der additive Term hängt von der Anzahl verschiedener Aufgabengrößen ab und ist nur für kleines $d$
 klein - im Vergleich zur $\mathrm{OPT}+1$-Garantie von \textcite{jansen_solisoba2010} ist das
 die schwächere Aussage, erkauft mit einem erheblich einfacheren Verfahren.
