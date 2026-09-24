@@ -125,8 +125,8 @@ Suchschritten einen Makespan von höchstens $(1+\varepsilon)(1+2^{-k})$ mal dem 
 Als dritte Alternative dient das Konfigurations-LP von \textcite{gilmore_gomory1961}, welches
 jede mögliche Füllung eines Behälters als eigene Variable führt und die Ganzzahligkeit zunächst
 fallen lässt.
-Für dieses Programm wird umgekehrt gezeigt, dass die beim Runden entstehende Schranke gerade
-nicht ausreicht, um die Gütegarantie von MULTIFIT zu tragen.
+Für dieses Programm wird umgekehrt gezeigt, dass die beim Runden entstehende Schranke die
+Schlussweise hinter $13/11$ nicht unmittelbar trägt.
 
 Was der Austausch praktisch bewirkt, misst Kapitel~\ref{chap:evaluation} in zwei Versuchsreihen.
 Die erste vergleicht FFD und MFFD auf \EvalInstanzen{} Instanzen aus fünf publizierten
@@ -135,8 +135,8 @@ Aufgabengrößen auf \HmInstanzen{} eigens erzeugten Instanzen.
 Kein gemessenes Verhältnis überschreitet dabei $13/11$ - für MULTIFIT+FFD liegt dieser Wert
 knapp unter der bewiesenen Schranke $13/11 + 2^{-k}$, für die übrigen Kombinationen ist er
 lediglich eine Vergleichslinie.
-Zugleich zeigen beide Reihen, dass aus einer schärferen Bin-Packing-Garantie kein kleinerer
-Makespan folgt.
+Zugleich liefern beide Reihen Instanzen, auf denen die schärfere Bin-Packing-Garantie den
+größeren Makespan liefert; sie sichert also keinen kleineren.
 
 \paragraph{Aufbau.}
 Kapitel~\ref{chap:grundlagen} legt die Grundlagen: Problemstellung und Notation, Bin Packing mit

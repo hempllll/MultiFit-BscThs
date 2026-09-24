@@ -1,32 +1,34 @@
 \chapter*{Zusammenfassung}
 
-Diese Arbeit untersucht MULTIFIT, ein Approximationsverfahren für die Makespan-Minimierung auf
-identischen Maschinen.
+Diese Arbeit untersucht MULTIFIT, ein Approximationsverfahren von Coffman, Garey und Johnson
+(1978) für die Makespan-Minimierung auf identischen Maschinen.
 Das Verfahren rät eine Schranke an den Makespan und überlässt dem Bin-Packing-Verfahren First
 Fit Decreasing (FFD) als Subroutine die Frage, ob die Aufgaben in ebenso viele Behälter dieser
 Größe passen, wie Maschinen vorhanden sind; eine Binärsuche verengt die Schranke anschließend.
 Im ersten Teil der Arbeit wird die Performanzanalyse von MULTIFIT geschlossen aufbereitet: Die
-Schranke $5/4$ für das Grenzverhältnis, an welchem das im schlechtesten Fall erreichte
-Verhältnis von erzeugtem zu optimalem Makespan hängt, wird vollständig bewiesen und mit dem
-Makespan nach $k$ Suchschritten verbunden; die schärfere Schranke $13/11$ wird eingeordnet, und
-für mindestens $13$ Maschinen wird gezeigt, dass sie sich nicht verbessern lässt.
+auf Coffman, Garey und Johnson (1978) zurückgehende Schranke $5/4$ für das Grenzverhältnis, an
+welchem das im schlechtesten Fall erreichte Verhältnis von erzeugtem zu optimalem Makespan
+hängt, wird vollständig bewiesen und mit dem Makespan nach $k$ Suchschritten verbunden; die
+schärfere Schranke $13/11$ von Cao (1995) wird eingeordnet, und an einer Instanz von Friesen
+(1984) wird gezeigt, dass sie sich für mindestens $13$ Maschinen nicht verbessern lässt.
 Im zweiten Teil der Arbeit wird die Subroutine von MULTIFIT ausgetauscht.
-Für Modified First Fit Decreasing (MFFD) als Subroutine wird gezeigt, dass es innerhalb von
-MULTIFIT dieselbe Zuordnung wie FFD liefert, sobald die mittlere Maschinenlast mindestens
-doppelt so groß ist wie die größte Aufgabe.
-Ein $\mathrm{OPT}+1$-Algorithmus für Instanzen mit $d$ verschiedenen Aufgabengrößen wird zu einem
-$\varepsilon$-dualen Verfahren umgebaut, welches höchstens die optimale Binzahl verwendet und
-dafür die Kapazität um den Faktor $1+\varepsilon$ überschreiten darf; MULTIFIT erreicht damit
-einen Makespan von höchstens $(1+\varepsilon)(1+2^{-k})$ mal dem Optimum, wobei
+Für Modified First Fit Decreasing (MFFD) von Johnson und Garey (1985) als Subroutine wird
+gezeigt, dass es innerhalb von MULTIFIT dieselbe Zuordnung wie FFD liefert, sobald die mittlere
+Maschinenlast mindestens doppelt so groß ist wie die größte Aufgabe.
+Der $\mathrm{OPT}+1$-Algorithmus von Jansen und Solis-Oba (2010) für Instanzen mit $d$
+verschiedenen Aufgabengrößen wird zu einem $\varepsilon$-dualen Verfahren im Sinne von Hochbaum
+und Shmoys (1987) umgebaut, welches höchstens die optimale Binzahl verwendet und dafür die
+Kapazität um den Faktor $1+\varepsilon$ überschreiten darf; MULTIFIT erreicht damit einen
+Makespan von höchstens $(1+\varepsilon)(1+2^{-k})$ mal dem Optimum, wobei
 $\varepsilon = 1/(2d-1)$ ist.
-Für das Konfigurations-LP reicht die beim Runden entstehende Schranke dagegen nicht aus, um die
-Gütegarantie von MULTIFIT zu tragen.
+Für das Konfigurations-LP von Gilmore und Gomory (1961) trägt die beim Runden entstehende
+Schranke dieselbe Schlussweise dagegen nicht.
 Sämtliche untersuchten Verfahren sind implementiert und praktisch getestet worden.
 Auf \EvalInstanzen{} Benchmark-Instanzen überschreitet kein gemessenes Verhältnis zum optimalen
 Makespan den Wert $13/11$, und MFFD liefert keinen systematisch kleineren Makespan als FFD.
 Auf \HmInstanzen{} Instanzen mit wenigen verschiedenen Aufgabengrößen liefert MULTIFIT mit dem
 $\mathrm{OPT}+1$-Algorithmus auf \HmJansenBesserFFD{} Instanzen einen kleineren, auf
 \HmJansenSchlechterFFD{} jedoch einen größeren Makespan als mit FFD.
-Eine im Mittel bessere Binzahl schlägt somit nicht auf den Makespan durch; dafür kommt es
-darauf an, bei welchen der getesteten Schranken die Subroutine die Maschinenzahl unterschreitet
-und, wo sie die Schranke überschreiten darf, wie weit sie das tut.
+Eine bessere Bin-Packing-Garantie sichert somit keinen kleineren Makespan; dafür kommt es darauf
+an, bei welchen der getesteten Schranken die Subroutine die Maschinenzahl unterschreitet und, wo
+sie die Schranke überschreiten darf, wie weit sie das tut.

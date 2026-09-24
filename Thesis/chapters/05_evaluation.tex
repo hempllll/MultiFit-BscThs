@@ -287,13 +287,14 @@ Auf den Benchmark-Datensätzen erfüllen \EvalRhoZwei{} der \EvalInstanzen{} Ins
 In keiner davon unterscheiden sich die gemessenen Makespans, wie es Lemma~\ref{lem:kollaps}
 verlangt.
 
-Abbildung~\ref{fig:kollaps} stellt das Kriterium dem bisher verwendeten Verhältnis $n/m$
-gegenüber.
+Abbildung~\ref{fig:kollaps} stellt das Kriterium dem Verhältnis $n/m$ gegenüber, auf das sich
+der Erwartungswert von $\rho(\Gamma)$ in Abschnitt~\ref{sub:kollaps} zurückführen lässt.
 Auch oberhalb von $n/m = 12$ tritt keine Abweichung auf (\EvalNMZwoelf{} Instanzen); dieser
 Wert ist jedoch an den Daten abgelesen und nicht hergeleitet.
 Das $n/m$-Kriterium trennt zudem weniger scharf: Die Abweichung mit dem größten $n/m$ liegt bei
-$n/m = \EvalNMMaxAbw$ auf und damit deutlich oberhalb von $n/m = 4$, ab dem die
-Erwartungswertargumentation aus Abschnitt~\ref{sub:kollaps} einen Kollaps nahelegt.
+$n/m = \EvalNMMaxAbw$ auf und damit deutlich oberhalb von $n/m = 4$, ab dem der Erwartungswert
+von $\rho(\Gamma)$ nach Abschnitt~\ref{sub:kollaps} den Wert $2$ erreicht - woraus für die
+einzelne Instanz nichts folgt.
 Bei $\rho$ liegt die größte beobachtete Abweichung dagegen bei $\rho = \EvalRhoMaxAbw$,
 unmittelbar unterhalb der bewiesenen Schwelle.
 
@@ -512,8 +513,14 @@ Der Makespan fällt allerdings nicht durchgängig monoton in $k$.
 MULTIFIT verkleinert die Kapazitätsschranke $C$, nicht den tatsächlich erreichten Makespan:
 Passt eine Packung mit kleinerem $C$ noch in $m$ Bins, wird sie übernommen, auch wenn ihre
 größte Binlast über der der bisher gespeicherten Packung liegt.
+Bei FFD ist das ausgeschlossen: Hat die von FFD bei Kapazität $C$ erzeugte Packung die größte
+Binlast $L$, so trifft FFD für jede Kapazität zwischen $L$ und $C$ dieselben
+Platzierungsentscheidungen und liefert dieselbe Packung; die gespeicherte Binlast kann mit
+wachsendem $k$ also nicht steigen.
+MFFD teilt die Aufgaben dagegen relativ zu $C$ in Klassen ein und kann bei kleinerem $C$
+schlechter packen.
 Über alle \EvalInstanzen{} Instanzen und alle Übergänge $k \to k+1$ zählt die Messung
-\EvalKNichtMonotonFFD{} solche Fälle bei MULTIFIT+FFD und \EvalKNichtMonotonMFFD{} bei
+entsprechend \EvalKNichtMonotonFFD{} solche Fälle bei MULTIFIT+FFD und \EvalKNichtMonotonMFFD{} bei
 MULTIFIT+MFFD; die größte dabei gemessene Verschlechterung beträgt \EvalKNichtMonotonMax{}
 (Instanz \texttt{\EvalKNichtMonotonInstanz}: Makespan \EvalKNichtMonotonVorher{} bei
 $k = \EvalKNichtMonotonKVorher$, \EvalKNichtMonotonNachher{} bei
@@ -718,7 +725,9 @@ $\mathrm{J}$ und $\mathrm{J}_\varepsilon$ unterscheiden sich nicht nur im Rundun
 sondern auch in der Anzahl der Aufrufe des Lösers.
 Für die Laufzeitmessung in Abschnitt~\ref{sub:hm-laufzeit} ist das der entscheidende
 Unterschied.
-$\mathrm{J}$ wird in der publizierten Form gemessen.
+$\mathrm{J}$ wird mit der inneren Binärsuche gemessen, also in der Suchstruktur der
+publizierten Fassung; im Verteilen der Reste weicht die Implementierung nach
+Abschnitt~\ref{sub:jansen-implementierung} von ihr ab.
 Schritt~2 bestimmt dort das kleinste $m^*$, für welches das MILP zulässig ist, per Binärsuche über
 $\{1, \ldots, n\}$ (Abschnitt~\ref{sub:jansen-implementierung}); jeder Suchschritt löst ein MILP
 und halbiert das Intervall, sodass je Kapazität $O(\log n)$ MILP-Aufrufe anfallen.
@@ -740,7 +749,7 @@ Grenze auf $C+1$ und endet, sobald sich untere und obere Grenze treffen.
 So prüft jeder Aufruf der Subroutine eine andere Kapazität.
 Theorem~\ref{thm:guete} und Korollar~\ref{kor:multifit-jansen-dual} sind für die Halbierung mit
 reellen Kapazitäten aus Abschnitt~\ref{sec:multifit} bewiesen, nicht für diese Variante; die
-beiden Schranken dienen in Abschnitt~\ref{sub:hm-garantien} deshalb als Vergleichslinien.
+beiden Schranken dienen in Abschnitt~\ref{sub:hm-guete} deshalb als Vergleichslinien.
 FFD wird deshalb in dieser Variante neu gemessen und nicht aus Abschnitt~\ref{sec:laufzeit}
 übernommen.
 Jede Instanz wird von allen fünf Subroutinen im selben Prozess bearbeitet.
@@ -788,7 +797,7 @@ größten Verhältnisse liegen zwischen \HmMaxRatioOptjansendual{} und \HmMaxRat
 \end{figure}
 
 Die Spalten der vier nicht exakten Subroutinen sind dabei unterschiedlich zu lesen.
-Zwei von ihnen stehen je einer instanzunabhängigen Vergleichslinie gegenüber: die Spalte zu
+Zwei von ihnen stehen je einer Vergleichslinie gegenüber: die Spalte zu
 MULTIFIT+FFD dem Wert $13/11 + 2^{-k} \approx \HmSchrankeK$ nach \textcite{cao1995}, die
 Spalte zu MULTIFIT+$\mathrm{J}_\varepsilon$ dem Wert $(1+\varepsilon)(1+2^{-k})$ aus
 Korollar~\ref{kor:multifit-jansen-dual}, wobei $\varepsilon = 1/(2d-1)$ hier zwischen
@@ -798,9 +807,9 @@ ganzzahlige Suche (Abschnitt~\ref{sub:hm-aufbau}); beim $\varepsilon$-dualen kom
 die Fassung ohne innere Binärsuche gemessen wird, für die das Argument am Ende von
 Abschnitt~\ref{sub:eps_dual} trägt und nicht Korollar~\ref{kor:multifit-jansen-dual} selbst.
 Für MULTIFIT+$\mathrm{J}$ beziffert Abschnitt~\ref{sub:anwendbarkeit} das Verhältnis zum
-Optimum je Instanz durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$ - eine Schranke,
-die von der Instanz abhängt und deshalb keine Güte im Sinn von Definition~\ref{def:guete}
-liefert.
+Optimum je Instanz durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$; über alle
+Instanzen genommen ergibt das nur den Wert~$2$ und damit keine mit $13/11$ vergleichbare
+Aussage.
 Für das Konfigurations-LP zeigt Abschnitt~\ref{sub:gg-multifit}, dass
 Implikation~\eqref{eq:ffd-akzeptiert} mit $r = 2$ trägt, sobald $m \ge 2(d-1)$ gilt - auf dem
 HM-Gitter ist das für \HmGgRZweiAnteil{} der Instanzen der Fall.

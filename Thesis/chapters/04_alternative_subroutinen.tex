@@ -369,8 +369,8 @@ Definition des Optimums gilt $\mathrm{OPT}[\Gamma, C] \le \mathrm{J}[\Gamma, C]$
 akzeptiert die Suche nur Kapazitäten, bei denen tatsächlich eine Packung in $m$ Bins existiert.
 Weil sie $C$ mit $\mathrm{J}[\Gamma, C] = m+1$ (und potenziell $\mathrm{OPT}[\Gamma, C] = m$) verwirft,
 konvergiert sie im schlechtesten Fall gegen den optimalen Makespan auf $m-1$ Maschinen.
-Bezeichnet $C^{*}_{\max}(\Gamma, m')$ den optimalen Makespan von $\Gamma$ auf $m'$ Maschinen -
-insbesondere $C^{*}_{\max}(\Gamma) = C^{*}_{\max}(\Gamma, m)$ -, so trägt folgende Kette:
+Mit der Kurzschreibweise $C^{*}_{\max}(\Gamma) = C^{*}_{\max}(\Gamma, m)$ aus
+Definition~\ref{def:instanz} trägt folgende Kette:
 Für $C \ge C^{*}_{\max}(\Gamma, m-1)$ ist $\mathrm{OPT}[\Gamma, C] \le m-1$ nach
 Lemma~\ref{lem:dualitaet}, also $\mathrm{J}[\Gamma, C] \le m$ nach der $\mathrm{OPT}+1$-Garantie
 - solche Kapazitäten akzeptiert die Suche stets.
@@ -378,8 +378,9 @@ Liegt $C^{*}_{\max}(\Gamma, m-1)$ im Startintervall, so ist der im Grenzwert $k 
 zurückgegebene Makespan damit durch $C^{*}_{\max}(\Gamma, m-1)$ beschränkt, das Verhältnis zum
 Optimum also durch $C^{*}_{\max}(\Gamma, m-1)/C^{*}_{\max}(\Gamma, m)$; bei endlichem $k$ kommt
 der Term $2^{-k}$ hinzu.
-Das ist eine Schranke je Instanz und keine Güte im Sinn von Definition~\ref{def:guete}, denn
-der Quotient ist über alle Instanzen nicht beschränkt.
+Das ist eine Schranke je Instanz; als Güte im Sinn von Definition~\ref{def:guete} gelesen, also
+als Supremum über alle Instanzen, liefert sie nur den Wert~$2$ - siehe das Beispiel am Ende
+dieses Abschnitts - und damit eine weit schwächere Aussage als $13/11$.
 Bestimmt in beiden Fällen die Durchschnittslast das Optimum, gilt also
 $C^{*}_{\max}(\Gamma, m) \approx \sum_j p_j/m$ und
 $C^{*}_{\max}(\Gamma, m-1) \approx \sum_j p_j/(m-1)$, so ist
@@ -450,7 +451,7 @@ Die Konstruktion eines $\varepsilon$-dualen Bin-Packing-Algorithmus ist damit de
 
 \subsubsection{Jansen-Dual: Modifikation des Rundungsschritts}
 
-Der Algorithmus aus Abschnitt~\ref{sub:anwendbarkeit} gibt höchstens $\mathrm{OPT}[\Gamma, C]+1$
+Der Algorithmus aus Abschnitt~\ref{sub:jansen-implementierung} gibt höchstens $\mathrm{OPT}[\Gamma, C]+1$
 Bins aus; der Extrabin entsteht in Schritt~3, weil die kleinen Aufgaben, die nach dem Verteilen
 auf die vorhandenen Bins übrig bleiben, dort in einen zusätzlichen Bin der Kapazität~$C$ gepackt
 werden \cite{jansen_solisoba2010}.
@@ -767,6 +768,8 @@ Lemma~\ref{lem:gg-ecke} ist $|F| \le d$.
   \item \emph{Restbedarf packen.} Der Restbedarf wird auf zwei Arten gepackt - einmal mit einem
     Bin je fraktionaler Konfiguration $a \in F$, gefüllt nach deren Muster, und einmal mit FFD -
     und die kleinere der beiden Packungen wird verwendet.
+    Bleibt ein Musterbin dabei leer, weil für seine Größen kein Restbedarf mehr besteht, so
+    entfällt er; die Musterpackung braucht deshalb höchstens $|F|$ Bins, oft weniger.
 \end{enumerate}
 
 \noindent

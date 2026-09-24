@@ -95,7 +95,9 @@ python Implementation/Empirical_Tests/thesis_figures_hm.py
 ```
 
 Runtimes depend on the machine, so a new measurement changes the runtime columns;
-all other numbers are deterministic.
+all other numbers are deterministic. Regenerated figures differ from the committed
+ones only in the creation date that matplotlib embeds; the rendered pages are
+identical.
 
 ### Section 5.1: FFD vs. MFFD (9 092 instances, real-valued capacities)
 
@@ -145,4 +147,11 @@ python Implementation/Empirical_Tests/thesis_figures_hm.py
 
 ```bash
 cd Thesis && latexmk    # -> Thesis/build/main.pdf
+```
+
+`main.pdf` carries the (currently empty) list of TODO notes on its own page.
+`Thesis/bachelorarbeit.pdf` is the submitted version and is built without it:
+
+```bash
+cd Thesis && latexmk -jobname=main_ohne_todos -usepretex='\def\OhneTodos{}' main.tex
 ```
